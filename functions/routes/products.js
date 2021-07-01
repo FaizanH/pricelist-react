@@ -37,6 +37,16 @@ router.route("/:id").delete((req, res) => {
         .catch(err => res.status(400).json("Error: " + err));
 });
 
+router.route("/pricing/:prodid/:Customer").delete((req, res) => {
+    console.log(req.params.Customer);
+    Product.updateOne(
+        {"_id": req.params.prodid},
+        { "$pull": {"pricing": {"Customer": req.params.Customer}} }
+    )
+    .then(deleted => res.json("Price removed: " + deleted))
+    .catch(err => res.status(400).json("Error: " + err));
+});
+
 router.route("/add").post((req, res) => {
     const sku = req.body.sku;
     const title = req.body.title;
@@ -59,7 +69,7 @@ router.route("/update/:id").post((req, res) => {
             product.sku = req.body.sku;
             product.active = req.body.active;
             product.title = req.body.title;
-            product.price = req.body.price;
+            product.pricing = req.body.pricing;
 
             product.save()
                 .then((post) => {

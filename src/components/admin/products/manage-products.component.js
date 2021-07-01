@@ -4,41 +4,38 @@ import { Table, Button, Form, InputGroup, FormControl } from "react-bootstrap";
 import axios from "axios";
 import deployment from "../../../deployment";
 import { getProducts } from "../../../services/services";
+import { findAllByTestId } from "@testing-library/react";
 
 let _isMounted = false;
+// let needsRefresh = false;
 
 const ManageProducts = props => {
-    const [products, setProducts] = useState("");
+    const [products, setProducts] = useState([]);
     const [customer, setCustomer] = useState({Customer: "Test Name", Price: 199});
+    const [update, setUpdate] = useState(false);
 
     useEffect(() => {
         _isMounted = true;
-        fetchData();
-
+        if (update || products.length === 0)
+            fetchData();
         return () => { _isMounted = false };
-    }, []);
+    }, [update]);
 
     const fetchData = async e => {
-        if (_isMounted) {
-            let res = await getProducts();
-            if (res) {
-                setProducts(res);
-            }
+        let res = await getProducts();
+        if (res) {
+            setProducts(res);
+            setUpdate(false);
         }
     }
 
-    const deleteProduct = async(id) => {
-        axios.delete(deployment.localhost + "/products/" + id)
-            .then(res => console.log(res.data));
-        setProducts(products.filter(el => el._id !== id))
-    }
-
-    const getPricing = e => {
-        // api get for customer query by name
-        // set products state to new data
-        return (
-            "Some customer's pricing"
-        );
+    const deleteProduct = async(prodid, Customer) => {
+        console.log(Customer);
+        axios.delete(deployment.localhost + "/products/pricing/" + prodid + "/" + Customer)
+            .then(res => {
+                console.log(res.data)
+                setUpdate(true);
+            });
     }
 
     const searchCustomer = e => {
@@ -47,16 +44,15 @@ const ManageProducts = props => {
         console.log("press me!")
     }
 
-    const Product = props => (
+    const CustomerPrice = props => (
         <tr>
-            <td>{customer.Customer}</td>
+            <td>{props.customer.Customer}</td>
             <td>{props.product.sku}</td>
-            <td>{props.product.active.toString()}</td>
             <td>{props.product.title}</td>
-            <td>{ getPricing() }</td>
+            <td>{props.customer.Price}</td>
             <td>
                 <Link to={"/admin/products/edit/" + props.product._id}>edit</Link> |
-                <a href="#" onClick={() => { props.deleteProduct(props.product._id) }}>delete</a>
+                <a href="#" onClick={() => { props.deleteProduct(props.product._id, props.customer.Customer) }}>delete</a>
             </td>
         </tr>
     )
@@ -64,14 +60,16 @@ const ManageProducts = props => {
     const productsList = e => {
         if (products != "") {
             return products.map(currentproduct => {
-                return <Product product={currentproduct} deleteProduct={deleteProduct} key={currentproduct._id} />;
+                return currentproduct.pricing.map(currentcustomer => {
+                    return <CustomerPrice product={currentproduct} customer={currentcustomer} deleteProduct={deleteProduct} key={currentcustomer._id} />;
+                })
             });
         }
     }
 
     return (
         <div>
-            <p>Products List Page</p>
+            <p>Catalogue Management Page</p>
             <Button as={Link} to="/admin/add-product" variant="primary" type="submit">Add Product</Button>
             <br/><br/>
             <Form onSubmit={searchCustomer} className="w-50">
@@ -92,7 +90,6 @@ const ManageProducts = props => {
                     <tr>
                         <th>Customer</th>
                         <th>SKU</th>
-                        <th>Active</th>
                         <th>Title</th>
                         <th>Price</th>
                         <th>Modify</th>
@@ -107,90 +104,3 @@ const ManageProducts = props => {
 }
 
 export default ManageProducts;
-
-// No state or lifecycles (Functional component)
-// const Product = props => (
-//     <tr>
-//         <td>{props.product.sku}</td>
-//         <td>{props.product.active.toString()}</td>
-//         <td>{props.product.title}</td>
-//         { this.getCustomer() }
-//         <td>
-//             <Link to={"/admin/products/edit/" + props.product._id}>edit</Link> |
-//             <a href="#" onClick={() => { props.deleteProduct(props.product._id) }}>delete</a>
-//         </td>
-//     </tr>
-// )
-
-// // Class component
-// export default class ManageProducts extends Component {
-//     constructor(props) {
-//         super(props);
-
-//         this.deleteProduct = this.deleteProduct.bind(this);
-//         this.state = { products: [] };
-//     }
-
-//     fetchData = async e => {
-//         let res = await getProducts();
-//         console.log(res);
-//         if (res) {
-//             this.setState({ products: res })
-//         }
-//     }
-
-//     // Get List of Products
-//     componentDidMount() {
-//         this.fetchData();
-//     }
-
-//     deleteProduct(id) {
-//         axios.delete(deployment.localhost + "/products/" + id)
-//             .then(res => console.log(res.data));
-
-//         this.setState({
-//             products: this.state.products.filter(el => el._id !== id) //_id refers to db collection id
-//         });
-//     }
-
-//     getCustomer() {
-//         return [
-//             <td key="0">
-//                 Hi
-//             </td>,
-//             <td key="1">
-//                 There
-//             </td>
-//         ]
-//     }
-
-//     productsList() {
-//         return this.state.products.map(currentproduct => {
-//             return <Product product={currentproduct} deleteProduct={this.deleteProduct} key={currentproduct._id} />;
-//         });
-//     }
-
-//     render() {
-//         return (
-//             <div>
-//                 <p>Products List Page</p>
-//                 <Button as={Link} to="/admin/add-product" variant="primary" type="submit">Add Product</Button>
-//                 <br/>
-//                 <Table striped bordered hover>
-//                     <thead>
-//                         <tr>
-//                             <th>SKU</th>
-//                             <th>Active</th>
-//                             <th>Title</th>
-//                             <th>Price</th>
-//                             <th>Modify</th>
-//                         </tr>
-//                     </thead>
-//                     <tbody>
-//                         { this.productsList() }
-//                     </tbody>
-//                 </Table>
-//             </div>
-//         );
-//     }
-// }

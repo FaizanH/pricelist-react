@@ -10,40 +10,29 @@ const AddProduct = props => {
     const [sku, setSku] = useState("");
     const [title, setTitle] = useState("");
     const [importDone, setImportDone] = useState(false);
+    const [Customer, setCustomerName] = useState("");
+    const [Price, setCustomerPrice] = useState("");
+
     let _isMounted = false;
 
     useEffect(() => {
         _isMounted = true;
-
+        console.log(pricing);
         return () => { _isMounted = false };
-    }, [setImportDone]);
+    }, [pricing]);
 
-    const onSubmit = e => {
-        e.preventDefault();
-        const product = {
-            sku,
-            title,
-            pricing
-        }
-        axios.post(deployment.localhost + "/products/add", product)
-        .then(res => {
-            console.log(res.data);
-            window.location = "/admin/products";
-        });
-    }
-
-    const deleteCustomer = e => {
-
+    const deleteCustomerPrice = Customer => {
+        setPricing(pricing.filter(el => el.Customer !== Customer));
     }
 
     const CustomerPrices = props => (
         <tr>
             <td>{props.customer.Customer}</td>
             <td>{props.customer.Price}</td>
-            {/* <td>
-                <Link to={"/admin/customers/edit/" + props.customer._id}>edit</Link> |
-                <a href="#" onClick={() => { props.deleteCustomer(props.customer._id) }}>delete</a>
-            </td> */}
+            <td>
+                {/* <Link to={"/admin/customers/edit/" + props.customer._id}>edit</Link> | */}
+                <a href="#" onClick={() => { props.deleteCustomerPrice(props.customer.Customer) }}>delete</a>
+            </td>
         </tr>
     );
 
@@ -69,38 +58,64 @@ const AddProduct = props => {
     );
 
     const pricingTable = e => {
-        if (!importDone) {
+        if (!importDone && pricing.length == 0) {
             return <DragNDropElement />
         } else {
             return pricing.map(currentcustomer => {
-                return <CustomerPrices customer={currentcustomer} deleteCustomer={deleteCustomer} key={pricing.indexOf(currentcustomer)} />;
+                return <CustomerPrices customer={currentcustomer} deleteCustomerPrice={deleteCustomerPrice} key={pricing.indexOf(currentcustomer)} />;
             });
         }
+    }
+
+    const onSubmit = e => {
+        e.preventDefault();
+        const product = {
+            sku,
+            title,
+            pricing
+        }
+        axios.post(deployment.localhost + "/products/add", product)
+        .then(res => {
+            console.log(res.data);
+            window.location = "/admin/products";
+        });
+    }
+
+    const addCustomerPrice = e => {
+        e.preventDefault();
+        let data = { Customer, Price };
+        // Append to state
+        setPricing(prev => [...prev, data]);
     }
 
     return (
         <div>
             <h6>Create New Product</h6>
-            <Form onSubmit={ onSubmit } className="mb-3">
+            <Form id="submit-new-product" onSubmit={ onSubmit } className="mb-3">
                 <Form.Label>SKU</Form.Label>
                 <Form.Control type="text" required value={sku} onChange={e => setSku(e.target.value)} placeholder=""/>
                 <Form.Label>Name</Form.Label>
                 <Form.Control type="text" value={title} onChange={e => setTitle(e.target.value)}  placeholder=""/>
                 <br/>
-                <Form.Label>Pricing</Form.Label>
+                <Form.Label>Add New Customer Price</Form.Label>
+                <Form.Control type="text" value={Customer} onChange={e => setCustomerName(e.target.value)} placeholder="Enter Customer Name"/>
+                <Form.Control type="text" value={Price} onChange={e => setCustomerPrice(e.target.value)} placeholder="Enter Price"/>
+                <Button onClick={ addCustomerPrice }>Add</Button>
+                <br/><br/>
                 <Table striped bordered hover>
                     <thead>
                         <tr>
                             <th>Customer</th>
                             <th>Price</th>
-                            {/* <th>Modify</th> */}
+                            <th>Modify</th>
                         </tr>
                     </thead>
                     <tbody>
                         { pricingTable() }
                     </tbody>
                 </Table>
-
+                <Button onClick={() => setPricing([])}>Clear</Button>
+                <br/><br/>
                 <Button as={Link} to="/admin/products" variant="primary">Back</Button>
                 <Button variant="primary" type="submit">Create</Button>
             </Form>
