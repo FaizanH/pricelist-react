@@ -60,11 +60,11 @@ export const getProductById = async (id) => {
     }
 }
 
-export const getProducts = async () => {
+export const getProducts = async (page, limit) => {
     const header = await createToken();
 
     try {
-        const res = await axios.get(deployment.localhost + "/products/", header)
+        const res = await axios.get(deployment.localhost + "/products?page=" + page + "&limit=" + limit, header)
         return res.data;
     } catch (e) {
         console.error(e);
