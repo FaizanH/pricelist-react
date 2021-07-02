@@ -1,4 +1,4 @@
 {
-    "localhost": "https://us-central1-pricelist-boulvandre.cloudfunctions.net/app",
-    "production": "http://localhost:5001/pricelist-boulvandre/us-central1/app"
+    "localhost": "http://localhost:5001/pricelist-boulvandre/us-central1/app",
+    "production": "https://us-central1-pricelist-boulvandre.cloudfunctions.net/app"
 }
