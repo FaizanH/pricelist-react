@@ -17,7 +17,8 @@ import UserMenu from "./components/public/common/menu/user-menu.component";
 import AdminMenu from "./components/public/common/menu/admin-menu.component";
 import CreateUser from "./components/admin/users/create-user.component";
 import ManageUsers from "./components/admin/users/manage-users.component";
-import ManageProducts from "./components/admin/products/manage-products.component";
+import ManageProducts from "./components/admin/products/manage-products";
+import ManagePricing from "./components/admin/products/manage-pricing";
 import AddProduct from "./components/admin/products/create-product.component";
 import EditProduct from "./components/admin/products/edit-product.component";
 import EditUser from "./components/admin/users/edit-user.component";
@@ -103,6 +104,7 @@ function App() {
             <ProtectedRoute exact path="/admin/create-user" user={user} isLoggedIn={isLoggedIn} component={CreateUser} />
             <ProtectedRoute exact path="/admin/add-product" user={user} isLoggedIn={isLoggedIn} component={AddProduct} />
             <ProtectedRoute exact path="/admin/users" user={user} isLoggedIn={isLoggedIn} component={ManageUsers} />
+            <ProtectedRoute exact path="/admin/pricing" user={user} isLoggedIn={isLoggedIn} component={ManagePricing} />
             <ProtectedRoute exact path="/admin/products" user={user} isLoggedIn={isLoggedIn} component={ManageProducts} />
             <ProtectedRoute exact path="/admin/users/edit/:id" user={user} isLoggedIn={isLoggedIn} component={EditUser} />
             <ProtectedRoute exact path="/admin/products/edit/:id" user={user} isLoggedIn={isLoggedIn} component={EditProduct} />
@@ -111,7 +113,7 @@ function App() {
             <Route exact path="/401" component={Unauthorised} />
 
             {/* Functional components */}
-            <Route exact path="/catalogue" component={ViewProducts} />
+            {/* <Route exact path="/catalogue" component={ViewProducts} /> */}
             <Route exact path="/" component={Home} />
             <Route exact path="/login"
               render={props => <Login {...props} successRoute={"/dashboard"} isLoggedIn={isLoggedIn} setIsLoggedInState={setIsLoggedInState} setLoadingState={setLoadingState} />} />

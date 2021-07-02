@@ -24,7 +24,6 @@ const Register = props => {
     const [first_name, setfirstname] = useState("");
     const [last_name, setlastname] = useState("");
     const [email_address, setemail] = useState("");
-    const [permission_group, setpermissions] = useState("");
 
     const handleRegister = async e => {
         e.preventDefault();
@@ -34,8 +33,7 @@ const Register = props => {
             password,
             first_name,
             last_name,
-            email_address,
-            permission_group
+            email_address
         };
         const res = await addUser(user);
         // Create user in Mongo
@@ -68,11 +66,6 @@ const Register = props => {
                     <Form.Control type="text" value={last_name} onChange={e => setlastname(e.target.value)} placeholder="Enter Last Name"/>
                     <Form.Control type="email" value={email_address} onChange={e => setemail(e.target.value)} placeholder="Enter Email"/>
                     <Form.Control type="password" required value={password} onChange={e => setpassword(e.target.value)} placeholder="Enter Password"/>
-                    <Form.Label>Access Level</Form.Label>
-                    <Form.Control as="select" aria-label="Permissions Select" value={permission_group} onChange={e => setpermissions(e.target.value)}>
-                        <option defaultValue>Standard</option>
-                        <option>Administrator</option>
-                    </Form.Control>
                 </Form.Group>
                 <Button as={Link} to="/" variant="primary">Back</Button>
                 <Button variant="primary" type="submit">Signup</Button>

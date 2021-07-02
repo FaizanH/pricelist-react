@@ -37,16 +37,6 @@ router.route("/:id").delete((req, res) => {
         .catch(err => res.status(400).json("Error: " + err));
 });
 
-router.route("/pricing/:prodid/:Customer").delete((req, res) => {
-    console.log(req.params.Customer);
-    Product.updateOne(
-        {"_id": req.params.prodid},
-        { "$pull": {"pricing": {"Customer": req.params.Customer}} }
-    )
-    .then(deleted => res.json("Price removed: " + deleted))
-    .catch(err => res.status(400).json("Error: " + err));
-});
-
 router.route("/add").post((req, res) => {
     const sku = req.body.sku;
     const title = req.body.title;
@@ -79,6 +69,34 @@ router.route("/update/:id").post((req, res) => {
                 .catch(err => res.status(400).json("Error: " + err));
         })
         .catch(err => res.status(400).json("Error: " + err));
+});
+
+// Pricing specific endpoints
+router.route("/pricing/:prodid/:Customer").delete((req, res) => {
+    console.log(req.params.Customer);
+    Product.updateOne(
+        {"_id": req.params.prodid},
+        { "$pull": {"pricing": {"Customer": req.params.Customer}} }
+    )
+    .then(deleted => res.json("Price removed: " + deleted))
+    .catch(err => res.status(400).json("Error: " + err));
+});
+
+router.route("/pricing").post((req, res) => {
+    console.log(req.body.Customer);
+    Product.updateOne(
+        {"_id": req.body.prodid},
+        { "$set": {
+            "pricing.$[pricing].Price": req.body.Price
+        }},
+        {"arrayFilters": [
+            {
+                "pricing.Customer": req.body.Customer
+            }
+        ]}
+    )
+    .then(updated => res.json("Price updated: " + updated))
+    .catch(err => res.status(400).json("Error: " + err));
 });
 
 module.exports = router;

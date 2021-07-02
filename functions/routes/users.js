@@ -14,18 +14,15 @@ router.route("/").get((req, res) => {
 });
 
 router.route("/id/:id").get((req, res) => {
-    // const auth = req.currentUser;
-    // if (auth) {
-        User.findById(req.params.id, function(err, user) {
-            if (err) {
-                throw err;
-            } else if (user) {
-                res.json(user)
-            } else {
-                res.json({"Error": "No user with given id found"});
-            }
-        });
-    // }
+	User.findById(req.params.id, function(err, user) {
+		if (err) {
+			throw err;
+		} else if (user) {
+			res.json(user)
+		} else {
+			res.json({"Error": "No user with given id found"});
+		}
+	});
 });
 
 router.route("/:id").delete((req, res) => {
@@ -38,19 +35,16 @@ router.route("/:id").delete((req, res) => {
 });
 
 router.route("/email").post((req, res) => {
-    const auth = req.currentUser;
-    if (auth) {
-        let email = req.body.email;
-        User.findOne({"email_address": email}, function(err, user) {
-            if (err) {
-                throw err;
-            } else if (user) {
-                res.json(user);
-            } else {
-                res.json({"Error": "No user with given email found"});
-            }
-        });
-    }
+	let email = req.body.email;
+	User.findOne({"email_address": email}, function(err, user) {
+		if (err) {
+			throw err;
+		} else if (user) {
+			res.json(user);
+		} else {
+			res.json({"Error": "No user with given email found"});
+		}
+	});
 });
 
 router.route("/add").post((req, res) => {

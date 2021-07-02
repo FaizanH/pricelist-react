@@ -52,6 +52,7 @@ const AdminSidebar = props => {
         <Nav className={menuCollapse}>
             <Nav.Link className="menu-link" as={Link} to={"/dashboard"}>Dashboard</Nav.Link>
             <Nav.Link className="menu-link" as={Link} to={"/admin/customers"}>Customers</Nav.Link>
+            <Nav.Link className="menu-link" as={Link} to={"/admin/pricing"}>Catalogue</Nav.Link>
             <Nav.Link className="menu-link" as={Link} to={"/admin/products"}>Products</Nav.Link>
             <Nav.Link className="menu-link" as={Link} to={"/admin/users"}>Users</Nav.Link>
             <Nav.Link className="menu-link" as={Link} to={"/dashboard"} disabled>Settings/Tools</Nav.Link>
