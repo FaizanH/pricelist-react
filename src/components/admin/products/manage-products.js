@@ -54,7 +54,7 @@ const ManageProducts = props => {
             <td>{props.product.sku}</td>
             <td>{props.product.title}</td>
             <td>
-                <Link to={"/admin/products/edit/" + props.product._id}>edit</Link> |
+                <Link to={"/admin/products/edit?sku=" + props.product.sku}>edit</Link> |
                 <a href="#" onClick={(e) => { props.deleteProduct(e, props.product._id) }}> delete</a>
             </td>
         </tr>

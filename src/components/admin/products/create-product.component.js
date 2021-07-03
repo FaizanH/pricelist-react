@@ -2,7 +2,9 @@ import React, { Component, useEffect, useState } from "react";
 import { Button, Table, Form } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import { createProduct } from "../../../services/services";
 import deployment from "../../../deployment";
+
 import { parse } from "papaparse";
 
 const AddProduct = props => {
@@ -17,7 +19,6 @@ const AddProduct = props => {
 
     useEffect(() => {
         _isMounted = true;
-        console.log(pricing);
         return () => { _isMounted = false };
     }, [pricing]);
 
@@ -67,23 +68,28 @@ const AddProduct = props => {
         }
     }
 
-    const onSubmit = e => {
+    const onSubmit = async e => {
         e.preventDefault();
         const product = {
             sku,
             title,
             pricing
         }
-        axios.post(deployment.localhost + "/products/add", product)
-        .then(res => {
-            console.log(res.data);
+        // axios.post(deployment.localhost + "/products/add", product)
+        // .then(res => {
+        //     console.log(res.data);
+        //     window.location = "/admin/products";
+        // });
+        let res = await createProduct(product);
+        if (res) {
             window.location = "/admin/products";
-        });
+        }
     }
 
     const addCustomerPrice = e => {
         e.preventDefault();
-        let data = { Customer, Price };
+        let p = parseInt(Price);
+        let data = { Customer, "Price": p };
         // Append to state
         setPricing(prev => [...prev, data]);
     }

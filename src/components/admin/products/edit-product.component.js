@@ -3,8 +3,9 @@ import { Button, Table, Form } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import deployment from "../../../deployment";
-import { getProductById, updateProduct } from "../../../services/services";
+import { getProductById, getProductBySku, updateProduct, createPrice, deletePrice, getPricesBySku } from "../../../services/services";
 import { parse } from "papaparse";
+import queryString from 'query-string';
 
 const EditProduct = props => {
     let _isMounted = false;
@@ -21,13 +22,16 @@ const EditProduct = props => {
     useEffect(() => {
         _isMounted = true;
         async function fetchData() {
-            let res = await getProductById(props.match.params.id);
+            let params = queryString.parse(props.location.search);
+            let res = await getProductBySku(params.sku);
 
             if (res) {
                 setsku(res.sku);
                 setactive(res.active);
                 settitle(res.title);
-                setPricing(res.pricing);
+
+                let prices = await getPricesBySku(res.sku);
+                setPricing(prices);
             }
         }
         fetchData();
@@ -40,27 +44,39 @@ const EditProduct = props => {
         const product = {
             sku,
             active,
-            title,
-            pricing
+            title
         }
-        console.log(pricing);
-        console.log(product);
-        let res = await updateProduct(props.match.params.id, product);
+
+        let res = await updateProduct(product);
         if (res) {
             console.log(res);
             window.location = "/admin/products";
         }
     }
 
-    const addCustomerPrice = e => {
+    const addCustomerPrice = async e => {
         e.preventDefault();
         let p = parseInt(Price);
-        let data = { Customer, "Price": p };
-        // Append to state
+
+        let data = {sku, Customer, "Price": p };
+
         setPricing(prev => [...prev, data]);
+
+        let product = {
+            sku,
+            Customer,
+            "Price": p
+        }
+        // Append to state
+        let res = await createPrice(product);
+        if (res) {
+            console.log(res);
+        }
     }
 
     const deleteCustomerPrice = Customer => {
+        // delete price from pricing
+        deletePrice(sku, Customer);
         setPricing(pricing.filter(el => el.Customer !== Customer));
     }
 
@@ -84,7 +100,7 @@ const EditProduct = props => {
             });
         }
     }
-    
+
     const DragNDropElement = props => (
         <tr>
             <td colSpan={"100%"}>

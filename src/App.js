@@ -107,7 +107,7 @@ function App() {
             <ProtectedRoute exact path="/admin/pricing" user={user} isLoggedIn={isLoggedIn} component={ManagePricing} />
             <ProtectedRoute exact path="/admin/products" user={user} isLoggedIn={isLoggedIn} component={ManageProducts} />
             <ProtectedRoute exact path="/admin/users/edit/:id" user={user} isLoggedIn={isLoggedIn} component={EditUser} />
-            <ProtectedRoute exact path="/admin/products/edit/:id" user={user} isLoggedIn={isLoggedIn} component={EditProduct} />
+            <ProtectedRoute exact path="/admin/products/edit" user={user} isLoggedIn={isLoggedIn} component={EditProduct} />
 
             {/* Static components */}
             <Route exact path="/401" component={Unauthorised} />

@@ -3,14 +3,16 @@ import { Link } from "react-router-dom";
 import { Table, Button, Form, InputGroup, FormControl, Pagination } from "react-bootstrap";
 import axios from "axios";
 import deployment from "../../../deployment";
-import { getProducts } from "../../../services/services";
+import { getPrices, updatePrice, deletePrice } from "../../../services/services";
 
 let _isMounted = false;
 let startMidPages = 2;
 let endMidPages = 2;
 
+// Refactor all methods to update price schema instead of products - remove pricing array from products
+
 const ManagePricing = props => {
-    const [products, setProducts] = useState([]);
+    const [prices, setProducts] = useState([]);
     // const [customer, setCustomer] = useState({});
     const [update, setUpdate] = useState(false);
     const [page, setPage] = useState(1);
@@ -20,7 +22,7 @@ const ManagePricing = props => {
 
     useEffect(() => {
         _isMounted = true;
-        if (update || products.length === 0) {
+        if (update || prices.length === 0) {
             fetchData(page, 5);
         }
 
@@ -28,7 +30,7 @@ const ManagePricing = props => {
     }, [update]);
 
     const fetchData = async (page, limit) => {
-        let res = await getProducts(page, limit);
+        let res = await getPrices(page, limit);
         if (res) {
             setProducts(res);
             endMidPages = res.total;
@@ -36,26 +38,30 @@ const ManagePricing = props => {
         }
     }
 
-    const deleteProduct = async(prodid, Customer) => {
+    const deletePrices = async(sku, Customer) => {
         console.log(Customer);
-        axios.delete(deployment.localhost + "/products/pricing/" + prodid + "/" + Customer)
-            .then(res => {
-                console.log(res.data)
-                setUpdate(true);
-            });
+        deletePrice(sku, Customer)
+        setUpdate(true);
+        // axios.delete(deployment.localhost + "/products/prices/" + prodid + "/" + Customer)
+        //     .then(res => {
+        //         console.log(res.data)
+        //         setUpdate(true);
+        //     });
     }
-    const updateProduct = async(prodid, Customer, Price) => {
+    const updatePrices = async(e, sku, Customer, Price) => {
+        e.preventDefault();
         console.log(Customer);
         let payload = {
-            prodid,
+            sku,
             Customer,
             Price
         }
-        axios.post(deployment.localhost + "/products/pricing", payload)
-            .then(res => {
-                console.log(res.data)
-                setUpdate(true);
-            });
+        updatePrice(payload);
+        // axios.post(deployment.localhost + "/products/pricing", payload)
+        //     .then(res => {
+        //         console.log(res.data)
+        //         setUpdate(true);
+        //     });
     }
 
     const searchCustomer = e => {
@@ -66,15 +72,15 @@ const ManagePricing = props => {
 
     const CustomerPrice = React.forwardRef((props, ref) => (
         <tr>
-            <td>{props.customer.Customer}</td>
-            <td><Link to={"/admin/products/edit/" + props.product._id}>{props.product.sku}</Link></td>
+            <td>{props.price.Customer}</td>
+            <td><Link to={"/admin/products/edit?sku=" + props.product.sku}>{props.product.sku}</Link></td>
             <td>{props.product.title}</td>
 
             <td>
             <Form.Control
                 type="text"
                 placeholder="Price"
-                defaultValue={props.customer.Price}
+                defaultValue={props.price.Price}
                 disabled={false}
                 // value={props.customer.Price}
                 // onChange={e => setPriceHandler(e, props.customer.Customer)}
@@ -83,53 +89,51 @@ const ManagePricing = props => {
 
             </td>
             <td key="events">
-                <a href="#" onClick={() => { props.updateProduct(props.product._id, props.customer.Customer, ref.current.value) }}>update</a> |
-                <a href="#" onClick={() => { props.deleteProduct(props.product._id, props.customer.Customer) }}> delete</a>
+                <a href="#" onClick={(e) => { props.updatePrices(e, props.product.sku, props.price.Customer, ref.current.value) }}>update</a> |
+                <a href="#" onClick={() => { props.deletePrices(props.product.sku, props.price.Customer) }}> delete</a>
             </td>
         </tr>
     ));
 
     const productsList = e => {
-        if (products != "") {
-            return products.results.map(currentproduct => {
-                return currentproduct.pricing.map(currentcustomer => {
-                    return <CustomerPrice ref={React.createRef()} product={currentproduct} customer={currentcustomer} updateProduct={updateProduct} deleteProduct={deleteProduct} key={currentcustomer._id} />;
-                });
+        if (prices != "") {
+            return prices.results.map(currentprice => {
+                return <CustomerPrice ref={React.createRef()} product={currentprice} price={currentprice} updatePrices={updatePrices} deletePrices={deletePrices} key={currentprice._id} />;
             });
         }
     }
 
     const prevPage = e => {
         e.preventDefault();
-        if (products.prev) {
-            setPage(products.prev.page);
+        if (prices.prev) {
+            setPage(prices.prev.page);
             setUpdate(true);
         }
     }
 
     const nextPage = e => {
         e.preventDefault();
-        if (products.next) {
-            setPage(products.next.page);
+        if (prices.next) {
+            setPage(prices.next.page);
             setUpdate(true);
         }
     }
 
     const goToPage = (e, p) => {
         e.preventDefault();
-        if (p <= products.total) {
+        if (p <= prices.total) {
             setPage(p);
             setUpdate(true);
         }
     }
 
     const checkPagination = e => {
-        if (products) {
-            if (products.total > 10) {
+        if (prices) {
+            if (prices.total > 10) {
                 // startMidPages = Math.ceil(products.total / 2);
                 endMidPages = startMidPages + 3;
-                if (endMidPages >= products.total) {
-                    endMidPages = products.total - 1;
+                if (endMidPages >= prices.total) {
+                    endMidPages = prices.total - 1;
                     startMidPages = endMidPages - 4;
                 }
             }
@@ -147,14 +151,14 @@ const ManagePricing = props => {
 
     const rotateMidPagesForward = e => {
         e.preventDefault();
-        if (endMidPages < products.total - 1) {
+        if (endMidPages < prices.total - 1) {
             startMidPages = startMidPages + 4;
             setUpdate(true);
         }
     }
 
     const listPages = e => {
-        if (products && products.total > 1) {
+        if (prices && prices.total > 1) {
             for (let i = startMidPages; i <= endMidPages; i++) {
                 lenArr.push(i);
             }
@@ -172,12 +176,12 @@ const ManagePricing = props => {
             <Pagination.Item key={1} active={page === 1} onClick={ e => goToPage(e, 1) }>{1}</Pagination.Item>
             { checkPagination() }
 
-            {(products.total > 10 && startMidPages > 2) ? <Pagination.Ellipsis onClick={e => rotateMidPagesBackwards(e)}/> : null}
+            {(prices.total > 10 && startMidPages > 2) ? <Pagination.Ellipsis onClick={e => rotateMidPagesBackwards(e)}/> : null}
 
             { listPages() }
 
-            {(products.total > 10 && endMidPages < products.total - 1) ? <Pagination.Ellipsis onClick={e => rotateMidPagesForward(e)} /> : null}
-            {products.total > 10 ? <Pagination.Item key={products.total+"-lastpg"} active={page === products.total} onClick={ e => goToPage(e, products.total) }>{products.total}</Pagination.Item> : null}
+            {(prices.total > 10 && endMidPages < prices.total - 1) ? <Pagination.Ellipsis onClick={e => rotateMidPagesForward(e)} /> : null}
+            {prices.total > 10 ? <Pagination.Item key={prices.total+"-lastpg"} active={page === prices.total} onClick={ e => goToPage(e, prices.total) }>{prices.total}</Pagination.Item> : null}
             <Pagination.Next key={"next"} onClick={ e => nextPage(e) } />
         </Pagination>
     )

@@ -38,18 +38,6 @@ const availabilitySchema = {
     }
 };
 
-const customerPricingSchema = new Schema({
-    Customer: {
-        type: String,
-    },
-    Price: {
-        type: Number,
-        default: 0
-    }
-}, {
-    timestamps: true,
-});
-
 const productSchema = new Schema({
     sku: {
         type: String,
@@ -78,7 +66,6 @@ const productSchema = new Schema({
         type: String,
         default: ""
     },
-    pricing: [customerPricingSchema],
     availability: {availabilitySchema}
 }, {
     timestamps: true,
