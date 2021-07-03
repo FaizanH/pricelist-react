@@ -16,6 +16,8 @@ const ManagePricing = props => {
     // const [customer, setCustomer] = useState({});
     const [update, setUpdate] = useState(false);
     const [page, setPage] = useState(1);
+    const [queryString, setQueryString] = useState("");
+    const [custQuery, setCustQuery] = useState("");
     const lenArr = [];
     // let updatedPrices = [];
     // const [updateBtn, setUpdateBtn] = useState(true);
@@ -30,7 +32,7 @@ const ManagePricing = props => {
     }, [update]);
 
     const fetchData = async (page, limit) => {
-        let res = await getPrices(page, limit);
+        let res = await getPrices(page, limit, queryString, custQuery);
         if (res) {
             setProducts(res);
             endMidPages = res.total;
@@ -65,9 +67,8 @@ const ManagePricing = props => {
     }
 
     const searchCustomer = e => {
-        // Find customer from form
         e.preventDefault();
-        console.log("press me!")
+        setUpdate(true);
     }
 
     const CustomerPrice = React.forwardRef((props, ref) => (
@@ -193,15 +194,13 @@ const ManagePricing = props => {
                 <InputGroup className="mb-3">
                     <FormControl
                         type="text"
-                        placeholder="Customer Name"
-                        // onChange={e => setCustomer(e.target.value)}
-                        // value={customer.Customer}
+                        placeholder="Customer"
+                        onChange={e => setCustQuery(e.target.value)}
                     />
                     <FormControl
                         type="text"
-                        placeholder="Product SKU"
-                        // onChange={e => setCustomer(e.target.value)}
-                        // value={customer.Customer}
+                        placeholder="Product Keywords"
+                        onChange={e => setQueryString(e.target.value)}
                     />
                     <InputGroup.Append>
                         <Button variant="primary" type="submit">Search</Button>

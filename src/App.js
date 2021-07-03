@@ -17,6 +17,7 @@ import UserMenu from "./components/public/common/menu/user-menu.component";
 import AdminMenu from "./components/public/common/menu/admin-menu.component";
 import CreateUser from "./components/admin/users/create-user.component";
 import ManageUsers from "./components/admin/users/manage-users.component";
+import ManageCustomers from "./components/admin/customers/manage-customers";
 import ManageProducts from "./components/admin/products/manage-products";
 import ManagePricing from "./components/admin/products/manage-pricing";
 import AddProduct from "./components/admin/products/create-product.component";
@@ -108,6 +109,7 @@ function App() {
             <ProtectedRoute exact path="/admin/products" user={user} isLoggedIn={isLoggedIn} component={ManageProducts} />
             <ProtectedRoute exact path="/admin/users/edit/:id" user={user} isLoggedIn={isLoggedIn} component={EditUser} />
             <ProtectedRoute exact path="/admin/products/edit" user={user} isLoggedIn={isLoggedIn} component={EditProduct} />
+            <ProtectedRoute exact path="/admin/customers" user={user} isLoggedIn={isLoggedIn} component={ManageCustomers} />
 
             {/* Static components */}
             <Route exact path="/401" component={Unauthorised} />

@@ -20,9 +20,11 @@ connection.once("open", () => {
 // Database
 const usersRouter = require("./routes/users");
 const productsRouter = require("./routes/products");
+const customersRouter = require("./routes/customers");
 
 app.use("/users", usersRouter);
 app.use("/products", productsRouter);
+app.use("/customers", customersRouter);
 
 app.get("/", (req, res) => {
     res.send("You have landed on the API server for the Pricelist Platform");

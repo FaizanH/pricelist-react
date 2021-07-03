@@ -14,6 +14,7 @@ const ManageProducts = props => {
     const [customer, setCustomer] = useState({Customer: "Test Name", Price: 199});
     const [update, setUpdate] = useState(false);
     const [page, setPage] = useState(1);
+    const [queryString, setQueryString] = useState("");
     const lenArr = [];
 
     useEffect(() => {
@@ -25,7 +26,7 @@ const ManageProducts = props => {
     }, [update]);
 
     const fetchData = async (page, limit) => {
-        let res = await getProducts(page, limit);
+        let res = await getProducts(page, limit, queryString, "");
 
         if (res) {
             setProducts(res);
@@ -44,9 +45,10 @@ const ManageProducts = props => {
     }
 
     const searchProducts = e => {
-        // Find customer from form
         e.preventDefault();
-        console.log("press me!")
+        console.log(queryString);
+
+        setUpdate(true);
     }
 
     const Product = props => (
@@ -161,9 +163,8 @@ const ManageProducts = props => {
                 <InputGroup className="mb-3">
                     <FormControl
                     type="text"
-                    placeholder="Product Name"
-                    // onChange={e => setCustomer(e.target.value)}
-                    // value={customer.Customer}
+                    placeholder="Search Keywords"
+                    onChange={e => setQueryString(e.target.value)}
                     />
                     <InputGroup.Append>
                         <Button variant="primary" type="submit">Search</Button>

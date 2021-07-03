@@ -6,6 +6,8 @@ function paginatedResults(model) {
     return async (req, res, next) => {
         const page = parseInt(req.query.page);
         const limit = parseInt(req.query.limit);
+        const query = req.query.q;
+        const customerQuery = req.query.custq;
 
         const startIndex = (page - 1) * limit;
         const endIndex = page * limit;
@@ -32,7 +34,36 @@ function paginatedResults(model) {
         results.total = Math.ceil(totalProducts / limit);
 
         try {
-            results.results = await model.find().limit(limit).skip(startIndex).exec();
+            console.log(query)
+            console.log(customerQuery)
+            if (query || customerQuery) {
+                let productQuery = [];
+                let custQuery = { "Customer": { $regex: customerQuery } };
+
+                if (query) {
+                    productQuery.push(
+                        { "sku": { $regex: query } },
+                        { "title": { $regex: query } }
+                    )
+                }
+
+                if (query && customerQuery) {
+                    results.results = await model.find({
+                        $and: [
+                            custQuery,
+                            { $or: productQuery }
+                        ]
+                    })
+                    .limit(limit).skip(startIndex).exec();
+                } else {
+                    if (customerQuery) {
+                        productQuery.push(custQuery);
+                    }
+                    results.results = await model.find({$or:productQuery}).limit(limit).skip(startIndex).exec();
+                }
+            } else {
+                results.results = await model.find().limit(limit).skip(startIndex).exec();
+            }
             res.paginatedResults = results;
             next()
         } catch (e) {

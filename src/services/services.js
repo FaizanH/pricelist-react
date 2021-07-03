@@ -82,22 +82,22 @@ export const getProductBySku = async (sku) => {
     }
 }
 
-export const getProducts = async (page, limit) => {
+export const getProducts = async (page, limit, q, cq) => {
     const header = await createToken();
 
     try {
-        const res = await axios.get(deployment.localhost + "/products?page=" + page + "&limit=" + limit, header)
+        const res = await axios.get(deployment.localhost + "/products?page=" + page + "&limit=" + limit + "&q=" + q + "&custq=" + cq, header)
         return res.data;
     } catch (e) {
         console.error(e);
     }
 }
 
-export const getPrices = async (page, limit) => {
+export const getPrices = async (page, limit, q, cq) => {
     const header = await createToken();
 
     try {
-        const res = await axios.get(deployment.localhost + "/products/prices?page=" + page + "&limit=" + limit, header)
+        const res = await axios.get(deployment.localhost + "/products/prices?page=" + page + "&limit=" + limit + "&q=" + q + "&custq=" + cq, header)
         return res.data;
     } catch (e) {
         console.error(e);
