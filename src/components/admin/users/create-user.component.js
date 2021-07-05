@@ -39,16 +39,18 @@ const CreateUser = props => {
             else if (res.data == "Username already exists")
                 console.log("Error: " + res.data);
 
-            // let originalUser = firebase.auth().currentUser;
+            let originalUser = firebase.auth().currentUser;
 
             firebase.auth().createUserWithEmailAndPassword(user.email_address, user.password)
                             .then((user) => {
                                 console.log(user);
-                                // firebase.auth().updateCurrentUser(originalUser);
+                                firebase.auth().updateCurrentUser(originalUser)
+                                                .then(() => {
+                                                    props.setLoadingState(false);
+                                                    window.location = "/admin/users";
+                                                })
                             })
                             .catch(err => console.error(err))
-            props.setLoadingState(false);
-            window.location = "/admin/users";
         }
     }
 
