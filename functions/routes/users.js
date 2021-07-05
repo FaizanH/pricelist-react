@@ -48,11 +48,6 @@ router.route("/email").post((req, res) => {
 });
 
 router.route("/add").post((req, res) => {
-    // const billing_details = [];
-    // const shipping_address = [];
-    // const payment_details = [];
-    // const account_details = [];
-    // const contact_log = [];
 
     const username = req.body.username;
     const password = req.body.password;
@@ -60,7 +55,6 @@ router.route("/add").post((req, res) => {
     const last_name = req.body.last_name;
     const email_address = req.body.email_address;
     const permission_group = req.body.permission_group;
-    // const phone = req.body.phone;
 
     const newUser = new User({
         username,
@@ -68,8 +62,7 @@ router.route("/add").post((req, res) => {
         first_name,
         last_name,
         email_address,
-        permission_group,
-        // phone,
+        permission_group
     });
 
     User.findOne({"username": username}, function(err, user) {
@@ -85,36 +78,30 @@ router.route("/add").post((req, res) => {
     });
 });
 
-router.route("/changePassword/:id").post((req, res) => {
-    const auth = req.currentUser;
-    if (auth) {
+router.route("/updateUser/:id").post((req, res) => {
+    // const auth = req.currentUser;
+    // if (auth) {
         const username = req.body.username;
-        const currentPassword = req.body.currentPassword;
-        const newPassword = req.body.newPassword;
-    
-        User.findOne({"username": username}, function(err, user) {
-            if (err) {
-                throw err;
-            } else if (user) {
-                user.comparePassword(currentPassword, function(err, isMatch) {
-                    if (err) {
-                        throw err;
-                    }
-                    console.log(isMatch);
-                    if (isMatch) {
-                        user.password = newPassword;
-                        user.save()
-                        .then(() => res.json(`User hash Updated: ${user}`))
+        const permission_group = req.body.permission_group;
+        if (username) {
+            User.findOne({"_id": req.params.id}, function(err, user) {
+                if (err) {
+                    throw err;
+                } else if (user) {
+                    user.username = username;
+                    user.permission_group = permission_group;
+                    user.save()
+                        .then(() => res.json(`User Updated: ${user}`))
                         .catch(err => res.status(400).json("Error: " + err));
-                    } else if (isMatch == -1) {
-                        res.json({"Error: ": "Current Password incorrect"});
-                    }
-                });
-            } else {
-                res.json({"Error": "No user with given username found"});
-            }
-        });
-    }
+                    console.log(user);
+                } else {
+                    res.json({"Error": "No user with given username found"});
+                }
+            });
+        } else {
+            res.json({"Error": "No username supplied"});
+        }
+    // }
 });
 
 module.exports = router;

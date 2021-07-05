@@ -65,9 +65,9 @@ userSchema.pre("save", function(next) {
     });
 });
 
-userSchema.methods.comparePassword = async function(password) {
-    return await bcrypt.compare(password, this.password);
-}
+// userSchema.methods.comparePassword = async function(password) {
+//     return await bcrypt.compare(password, this.password);
+// }
 
 userSchema.methods.comparePasswordChange = function(candidatePassword, cb) {
     bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {

@@ -3,16 +3,16 @@ import { Link } from "react-router-dom";
 import { Button } from "react-bootstrap";
 import { Table } from "react-bootstrap";
 import axios from "axios";
+import { deleteCustomer } from "../../../services/services";
 import deployment from "../../../deployment";
 
 const Customer = props => (
     <tr>
-        <td>{props.user.username}</td>
-        <td>{props.user.first_name} {props.user.last_name}</td>
-        <td>{props.user.status}</td>
+        <td>{props.customer.name}</td>
+        <td>{props.customer.email}</td>
         <td>
-            <Link to={"/admin/customers/edit/" + props.user._id}>edit</Link> |
-            <a href="#" onClick={() => { props.deleteUser(props.user._id) }}>delete</a>
+            <Link to={"/admin/customers/edit/" + props.customer._id}>edit</Link> |
+            <a href="#" onClick={() => { props.delCustomer(props.customer._id) }}>delete</a>
         </td>
     </tr>
 );
@@ -21,7 +21,7 @@ export default class ManageCustomers extends Component {
     constructor(props) {
         super(props);
 
-        this.deleteCustomer = this.deleteCustomer.bind(this);
+        this.delCustomer = this.delCustomer.bind(this);
 
         this.state = { customers: [] };
     }
@@ -34,18 +34,21 @@ export default class ManageCustomers extends Component {
             .catch(err => console.log(err));
     }
 
-    deleteCustomer(id) {
+    async delCustomer(id) {
         axios.delete(deployment.localhost + "/customers/" + id)
             .then(res => console.log(res.data));
 
-        this.setState({
-            customers: this.state.customers.filter(el => el._id !== id)
-        });
+        let res = await deleteCustomer(id);
+        if (res) {
+            this.setState({
+                customers: this.state.customers.filter(el => el._id !== id)
+            });
+        }
     }
 
     customersList() {
         return this.state.customers.map(current => {
-            return <Customer customer={current} deleteCustomer={this.deleteCustomer} key={current._id} />;
+            return <Customer customer={current} delCustomer={this.delCustomer} key={current._id} />;
         });
     }
 
@@ -53,7 +56,7 @@ export default class ManageCustomers extends Component {
         return (
             <div>
                 <h3>Manage Customers</h3>
-                <Button as={Link} to="/admin/create-user" variant="primary" type="submit">Add Customer</Button>
+                <Button as={Link} to="/admin/create-customer" variant="primary" type="submit">Add Customer</Button>
                 <br/>
                 <Table striped bordered hover>
                     <thead>

@@ -16,16 +16,30 @@ const createToken = async () => {
     return payloadHeader;
 }
 
-export const getUser = async () => {
+// Users
+
+// export const getUser = async () => {
+//     const header = await createToken();
+
+//     try {
+//       const res = await axios.get(deployment.localhost + "/auth/user", header);
+//       return res.data;
+//     } catch (e) {
+//       console.error(e);
+//     }
+// }
+
+export const getUserById = async (id) => {
     const header = await createToken();
 
     try {
-      const res = await axios.get(deployment.localhost + "/auth/user", header);
-      return res.data;
+        const res = await axios.get(deployment.localhost + "/users/id/" + id, header)
+        return res.data;
     } catch (e) {
-      console.error(e);
+        console.error(e);
     }
 }
+
 
 export const getUserByEmail = async (email) => {
     const header = await createToken();
@@ -48,6 +62,30 @@ export const addUser = async (user) => {
         console.error(e);
     }
 }
+
+export const deleteUser = async (id) => {
+    const header = await createToken();
+
+    try {
+        const res = await axios.delete(deployment.localhost + "/users/" + id, header);
+        return res.data;
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+export const updateUser = async(id, user) => {
+    const header = await createToken();
+
+    try {
+        const res = await axios.post(deployment.localhost + "/users/updateUser/" + id, user);
+        return res.data;
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+// Products
 
 export const createProduct = async (product) => {
     const header = await createToken();
@@ -93,6 +131,19 @@ export const getProducts = async (page, limit, q, cq) => {
     }
 }
 
+export const updateProduct = async (product) => {
+    const header = await createToken();
+
+    try {
+        const res = await axios.post(deployment.localhost + "/products/update", product, header)
+        return res.data;
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+// Prices
+
 export const getPrices = async (page, limit, q, cq) => {
     const header = await createToken();
 
@@ -109,17 +160,6 @@ export const getPricesBySku = async (sku) => {
 
     try {
         const res = await axios.get(deployment.localhost + "/products/prices/search?sku=" + sku, header)
-        return res.data;
-    } catch (e) {
-        console.error(e);
-    }
-}
-
-export const updateProduct = async (product) => {
-    const header = await createToken();
-
-    try {
-        const res = await axios.post(deployment.localhost + "/products/update", product, header)
         return res.data;
     } catch (e) {
         console.error(e);
@@ -153,6 +193,62 @@ export const updatePrice = async (product) => {
 
     try {
         const res = await axios.post(deployment.localhost + "/products/prices/update", product);
+        return res.data;
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+// Customers
+export const getCustomers = async () => {
+    const header = await createToken();
+
+    try {
+      const res = await axios.get(deployment.localhost + "/customers/", header);
+      return res.data;
+    } catch (e) {
+      console.error(e);
+    }
+}
+
+export const getCustomer = async (id) => {
+    const header = await createToken();
+
+    try {
+      const res = await axios.get(deployment.localhost + "/customers/" + id, header);
+      return res.data;
+    } catch (e) {
+      console.error(e);
+    }
+}
+
+export const createCustomer = async (user) => {
+    const header = await createToken();
+
+    try {
+        const res = await axios.post(deployment.localhost + "/users/add", user, header)
+        return res.data;
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+export const updateCustomer = async (customer) => {
+    const header = await createToken();
+
+    try {
+        const res = await axios.post(deployment.localhost + "/customers/update", customer);
+        return res.data;
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+export const deleteCustomer = async (id) => {
+    const header = await createToken();
+
+    try {
+        const res = await axios.delete(deployment.localhost + "/customers/" + id, header);
         return res.data;
     } catch (e) {
         console.error(e);

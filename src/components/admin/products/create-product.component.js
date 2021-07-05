@@ -1,8 +1,9 @@
 import React, { Component, useEffect, useState } from "react";
 import { Button, Table, Form } from "react-bootstrap";
+import Select from 'react-select'
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { createProduct } from "../../../services/services";
+import { createProduct, getCustomers } from "../../../services/services";
 import deployment from "../../../deployment";
 
 import { parse } from "papaparse";
@@ -14,16 +15,31 @@ const AddProduct = props => {
     const [importDone, setImportDone] = useState(false);
     const [Customer, setCustomerName] = useState("");
     const [Price, setCustomerPrice] = useState("");
+    const [customers, setCustomers] = useState([]);
 
     let _isMounted = false;
 
     useEffect(() => {
         _isMounted = true;
+        async function fetchData() {
+            let customers = await getCustomers();
+            if (customers) {
+                customers.map(currentCustomer => {
+                    let mapCust = {
+                        value: currentCustomer._id,
+                        label: currentCustomer.name
+                    }
+                    setCustomers(prev => [...prev, mapCust]);
+                });
+            }
+        }
+        fetchData();
         return () => { _isMounted = false };
     }, [pricing]);
 
     const deleteCustomerPrice = Customer => {
         setPricing(pricing.filter(el => el.Customer !== Customer));
+        setCustomers([]);
     }
 
     const CustomerPrices = props => (
@@ -75,11 +91,6 @@ const AddProduct = props => {
             title,
             pricing
         }
-        // axios.post(deployment.localhost + "/products/add", product)
-        // .then(res => {
-        //     console.log(res.data);
-        //     window.location = "/admin/products";
-        // });
         let res = await createProduct(product);
         if (res) {
             window.location = "/admin/products";
@@ -92,6 +103,7 @@ const AddProduct = props => {
         let data = { Customer, "Price": p };
         // Append to state
         setPricing(prev => [...prev, data]);
+        setCustomers([]);
     }
 
     return (
@@ -104,7 +116,7 @@ const AddProduct = props => {
                 <Form.Control type="text" value={title} onChange={e => setTitle(e.target.value)}  placeholder=""/>
                 <br/>
                 <Form.Label>Add New Customer Price</Form.Label>
-                <Form.Control type="text" value={Customer} onChange={e => setCustomerName(e.target.value)} placeholder="Enter Customer Name"/>
+                <Select options={customers} onChange={e => setCustomerName(e.label)} placeholder="Select Customer" />
                 <Form.Control type="text" value={Price} onChange={e => setCustomerPrice(e.target.value)} placeholder="Enter Price"/>
                 <Button onClick={ addCustomerPrice }>Add</Button>
                 <br/><br/>

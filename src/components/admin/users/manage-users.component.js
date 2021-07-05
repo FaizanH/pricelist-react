@@ -4,12 +4,13 @@ import { Button } from "react-bootstrap";
 import { Table } from "react-bootstrap";
 import axios from "axios";
 import deployment from "../../../deployment";
+import { deleteUser } from "../../../services/services";
 
 const User = props => (
     <tr>
         <td>{props.user.username}</td>
         <td>{props.user.first_name} {props.user.last_name}</td>
-        <td>{props.user.status}</td>
+        <td>{props.user.permission_group}</td>
         <td>
             <Link to={"/admin/users/edit/" + props.user._id}>edit</Link> |
             <a href="#" onClick={() => { props.deleteUser(props.user._id) }}>delete</a>
@@ -35,9 +36,7 @@ export default class ManageUsers extends Component {
     }
 
     deleteUser(id) {
-        axios.delete(deployment.localhost + "/users/" + id)
-            .then(res => console.log(res.data));
-
+        deleteUser(id)
         this.setState({
             users: this.state.users.filter(el => el._id !== id)
         });
@@ -60,7 +59,7 @@ export default class ManageUsers extends Component {
                         <tr>
                             <th>Username</th>
                             <th>Name</th>
-                            <th>Status</th>
+                            <th>Permissions</th>
                         </tr>
                     </thead>
                     <tbody>

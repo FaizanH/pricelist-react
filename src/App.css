@@ -108,6 +108,9 @@
 }
 
 /* Top Nav */
+.navbar {
+  z-index: 99;
+}
 .sticky-top {
   position: fixed;
   top: 0;

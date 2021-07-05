@@ -1,9 +1,10 @@
 import React, { Component, useState, useEffect } from "react";
 import { Button, Table, Form } from "react-bootstrap";
+import Select from 'react-select'
 import { Link } from "react-router-dom";
 import axios from "axios";
 import deployment from "../../../deployment";
-import { getProductById, getProductBySku, updateProduct, createPrice, deletePrice, getPricesBySku } from "../../../services/services";
+import { getCustomers, getProductById, getProductBySku, updateProduct, createPrice, deletePrice, getPricesBySku } from "../../../services/services";
 import { parse } from "papaparse";
 import queryString from 'query-string';
 
@@ -17,6 +18,7 @@ const EditProduct = props => {
     const [importDone, setImportDone] = useState(false);
     const [Customer, setCustomerName] = useState("");
     const [Price, setCustomerPrice] = useState(0);
+    const [customers, setCustomers] = useState([]);
     // Remainder need to be separated into components i.e. shipping
 
     useEffect(() => {
@@ -24,6 +26,7 @@ const EditProduct = props => {
         async function fetchData() {
             let params = queryString.parse(props.location.search);
             let res = await getProductBySku(params.sku);
+            let customers = await getCustomers();
 
             if (res) {
                 setsku(res.sku);
@@ -32,6 +35,16 @@ const EditProduct = props => {
 
                 let prices = await getPricesBySku(res.sku);
                 setPricing(prices);
+
+                if (customers) {
+                    customers.map(currentCustomer => {
+                        let mapCust = {
+                            value: currentCustomer._id,
+                            label: currentCustomer.name
+                        }
+                        setCustomers(prev => [...prev, mapCust]);
+                    });
+                }
             }
         }
         fetchData();
@@ -39,7 +52,6 @@ const EditProduct = props => {
     }, []);
 
     const onSubmit = async e => {
-        // Get state modifiers here to do loading when submit executes
         e.preventDefault();
         const product = {
             sku,
@@ -129,13 +141,11 @@ const EditProduct = props => {
             <Form onSubmit={onSubmit} className="mb-3">
                 <Form.Label>SKU</Form.Label>
                 <Form.Control type="text" required value={sku} onChange={e => setsku(e.target.value)} placeholder=""/>
-                {/* <Form.Label>Active</Form.Label>
-                <Form.Control type="text" required value={active} onChange={e => setactive(e.target.value)} placeholder=""/> */}
                 <Form.Label>Name</Form.Label>
                 <Form.Control type="text" required value={title} onChange={e => settitle(e.target.value)} placeholder=""/>
                 <br/>
                 <Form.Label>Add New Customer Price</Form.Label>
-                <Form.Control type="text" value={Customer} onChange={e => setCustomerName(e.target.value)} placeholder="Enter Customer Name"/>
+                <Select options={customers} onChange={e => setCustomerName(e.label)} placeholder="Select Customer" />
                 <Form.Control type="text" value={Price} onChange={e => setCustomerPrice(e.target.value)} placeholder="Enter Price"/>
                 <Button onClick={ addCustomerPrice }>Add</Button>
                 <br/><br/>

@@ -2,14 +2,12 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const customerSchema = new Schema({
-    customerName: {
+    name: {
         type: String,
-        required: true,
-        trim: true,
-        minlength: 3
+        required: true
     },
     email: {
-        type: Boolean,
+        type: String,
         default: false
     },
 }, {

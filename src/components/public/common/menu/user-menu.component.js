@@ -1,20 +1,20 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import { Navbar, Nav, NavItem, NavDropdown, MenuItem, NavLink } from "react-bootstrap";
-
-import axios from "axios";
-import deployment from "../../../../deployment";
-
-let config = {
-    withCredentials: true,
-    credentials: "include",
-    headers: {
-        "Accept": "*/*",
-        "Content-Type": "application/json"
-    }
-};
+import firebase from "../../../../firebase";
 
 const UserMenu = props => {
+    const handleLogout = async e => {
+        e.preventDefault();
+        props.setLoadingState(true);
+        firebase.auth().signOut()
+                        .then(() => {
+                            console.log("Signed out user");
+                            props.setLoggedOutState();
+                            props.setLoadingState(false);
+                        })
+    }
+
     return (
         <div className="user-menu">
             <Navbar className="p-2 w-100" bg="dark" variant="dark" expand="lg">
@@ -26,6 +26,7 @@ const UserMenu = props => {
                         <NavDropdown title="Manage" id="basic-nav-dropdown">
                             <NavDropdown.Item as={Link} to="/admin/products">Manage Products</NavDropdown.Item>
                         </NavDropdown>
+                        <Nav.Link className="menu-link" onClick={handleLogout}>Logout</Nav.Link>
                     </Nav>
                 </Navbar.Collapse>
                 <Navbar.Brand className="navbar-user" as={Link} to="/dashboard">{props.user.username.toString()}</Navbar.Brand>

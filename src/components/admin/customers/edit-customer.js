@@ -4,28 +4,37 @@ import { Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import deployment from "../../../deployment";
+import { getCustomer, updateCustomer } from "../../../services/services";
 
 export default class EditCustomer extends Component {
     constructor(props) {
         super(props);
 
-        this.onChangeCustomerName = this.onChangeCustomerName.bind(this);
+        this.onChangeName = this.onChangeName.bind(this);
         this.onChangeEmail = this.onChangeEmail.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
 
         this.state = {
-            customerName: '',
+            name: '',
             email: ''
         }
     }
 
     componentDidMount() {
-
+        const getUpdates = async e => {
+            let res = await getCustomer(this.props.match.params.id);
+            if (res)
+                this.setState({
+                    name: res.name,
+                    email: res.email
+                });
+        }
+        getUpdates();
     }
 
-    onChangeCustomerName(e) {
+    onChangeName(e) {
         this.setState({
-            customerName: e.target.value
+            name: e.target.value
         });
     }
     onChangeEmail(e) {
@@ -34,19 +43,20 @@ export default class EditCustomer extends Component {
         });
     }
 
-    onSubmit(e) {
+    async onSubmit(e) {
         e.preventDefault();
         const customer = {
-            customerName: this.state.customerName,
+            name: this.state.name,
             email: this.state.email,
         }
-        axios.post(deployment.localhost + "/users/changePassword/" + this.props.match.params.id, customer)
-            .then(res => console.log(res.data));
-
-        this.setState({
-            customerName: '',
-            email: ''
-        })
+        let res = await updateCustomer(customer);
+        if (res) {
+            this.setState({
+                name: '',
+                email: ''
+            })
+            window.location = "/admin/customers";
+        }
     }
 
     render() {
@@ -56,9 +66,9 @@ export default class EditCustomer extends Component {
                 <Form onSubmit={this.onSubmit}>
                     <Form.Group>
                         <Form.Label>Customer Name</Form.Label>
-                        <Form.Control type="text" value={this.state.firstName} onChange={this.onChangeFirstName} placeholder="Enter First Name"/>
+                        <Form.Control type="text" value={this.state.name} onChange={this.onChangeName} placeholder="Customer Name"/>
                         <Form.Label>Email</Form.Label>
-                        <Form.Control type="email" value={this.state.email} onChange={this.onChangeEmail} placeholder="Enter Email"/>
+                        <Form.Control type="email" value={this.state.email} onChange={this.onChangeEmail} placeholder="Email Address"/>
                     </Form.Group>
                     <Button as={Link} to="/admin/customers" variant="primary">Back</Button>
                     <Button variant="primary" type="submit">Save</Button>

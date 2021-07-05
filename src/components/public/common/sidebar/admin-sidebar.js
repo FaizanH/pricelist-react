@@ -57,9 +57,6 @@ const AdminSidebar = props => {
             <Nav.Link className="menu-link" as={Link} to={"/admin/users"}>Users</Nav.Link>
             <Nav.Link className="menu-link" as={Link} to={"/dashboard"} disabled>Settings/Tools</Nav.Link>
             <Nav.Link className="menu-link" onClick={handleLogout}>Logout</Nav.Link>
-            {/* <Nav.Item className="collapse-menu">
-                <Nav.Link className="btn" onClick={collapseMenu}>{arrowState}</Nav.Link>
-            </Nav.Item> */}
         </Nav>
     );
 }

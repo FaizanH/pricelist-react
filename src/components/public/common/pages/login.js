@@ -32,7 +32,7 @@ const Login = props => {
             <h1>Login</h1>
             <Form onSubmit={handleLogin}>
                 <Form.Group>
-                    <Form.Control type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="Enter Username"/>
+                    <Form.Control type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="Enter Email"/>
                     <Form.Control type="password" required value={password} onChange={e => setpassword(e.target.value)} placeholder="Enter Current Password"/>
                 </Form.Group>
                 <br />
