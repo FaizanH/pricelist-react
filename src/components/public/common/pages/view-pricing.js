@@ -1,7 +1,7 @@
 import React, { Component, useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Table, Button, Form, InputGroup, FormControl, Pagination } from "react-bootstrap";
-import { getPrices, updatePrice, deletePrice } from "../../../../services/services";
+import { getPrices} from "../../../../services/services";
 
 let _isMounted = false;
 let startMidPages = 2;
@@ -36,32 +36,6 @@ const ViewPricing = props => {
         }
     }
 
-    const deletePrices = async(sku, Customer) => {
-        console.log(Customer);
-        deletePrice(sku, Customer)
-        setUpdate(true);
-        // axios.delete(deployment.localhost + "/products/prices/" + prodid + "/" + Customer)
-        //     .then(res => {
-        //         console.log(res.data)
-        //         setUpdate(true);
-        //     });
-    }
-    const updatePrices = async(e, sku, Customer, Price) => {
-        e.preventDefault();
-        console.log(Customer);
-        let payload = {
-            sku,
-            Customer,
-            Price
-        }
-        updatePrice(payload);
-        // axios.post(deployment.localhost + "/products/pricing", payload)
-        //     .then(res => {
-        //         console.log(res.data)
-        //         setUpdate(true);
-        //     });
-    }
-
     const searchCustomer = e => {
         e.preventDefault();
         setUpdate(true);
@@ -78,16 +52,9 @@ const ViewPricing = props => {
                 type="text"
                 placeholder="Price"
                 defaultValue={props.price.Price}
-                disabled={false}
-                // value={props.customer.Price}
-                // onChange={e => setPriceHandler(e, props.customer.Customer)}
+                disabled={true}
                 ref={ref}
             />
-
-            </td>
-            <td key="events">
-                <a href="#" onClick={(e) => { props.updatePrices(e, props.product.sku, props.price.Customer, ref.current.value) }}>update</a> |
-                <a href="#" onClick={() => { props.deletePrices(props.product.sku, props.price.Customer) }}> delete</a>
             </td>
         </tr>
     ));
@@ -95,7 +62,7 @@ const ViewPricing = props => {
     const productsList = e => {
         if (prices != "") {
             return prices.results.map(currentprice => {
-                return <CustomerPrice ref={React.createRef()} product={currentprice} price={currentprice} updatePrices={updatePrices} deletePrices={deletePrices} key={currentprice._id} />;
+                return <CustomerPrice ref={React.createRef()} product={currentprice} price={currentprice} key={currentprice._id} />;
             });
         }
     }
@@ -210,7 +177,6 @@ const ViewPricing = props => {
                         <th>SKU</th>
                         <th>Title</th>
                         <th>Price</th>
-                        <th>Modify</th>
                     </tr>
                 </thead>
                 <tbody>

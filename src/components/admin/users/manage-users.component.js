@@ -12,8 +12,8 @@ const User = props => (
         <td>{props.user.first_name} {props.user.last_name}</td>
         <td>{props.user.permission_group}</td>
         <td>
-            <Link to={"/admin/users/edit/" + props.user._id}>edit</Link> |
-            <a href="#" onClick={() => { props.deleteUser(props.user._id) }}>delete</a>
+            <Link to={"/admin/users/edit/" + props.user._id}>edit</Link>
+            {/* <a href="/admin/users" onClick={() => { props.deleteUser(props.user._id) }}>delete</a> */}
         </td>
     </tr>
 );
@@ -35,11 +35,13 @@ export default class ManageUsers extends Component {
             .catch(err => console.log(err));
     }
 
-    deleteUser(id) {
-        deleteUser(id)
-        this.setState({
-            users: this.state.users.filter(el => el._id !== id)
-        });
+    async deleteUser(id) {
+        let res = await deleteUser(id);
+        if (res) {
+            this.setState({
+                users: this.state.users.filter(el => el._id !== id)
+            });
+        }
     }
 
     usersList() {
@@ -60,6 +62,7 @@ export default class ManageUsers extends Component {
                             <th>Username</th>
                             <th>Name</th>
                             <th>Permissions</th>
+                            <th>Modify</th>
                         </tr>
                     </thead>
                     <tbody>

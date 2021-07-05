@@ -1,6 +1,24 @@
 const router = require("express").Router();
 let User = require("../models/user.model");
 
+router.route("/validate").post((req, res) => {
+    const username = req.body.username;
+    const password = req.body.password;
+
+    User.findOne({ "username": username}, function(err, user) {
+        if (err) {
+            throw err;
+        } else if (user) {
+            user.comparePasswordChange(password, function(err, isMatch) {
+                if (err) throw err;
+                res.json(isMatch);
+            });
+        } else {
+            res.json({"Error": "User with given username not found"});
+        }
+    });
+});
+
 router.route("/").get((req, res) => {
     // Re-enable auth check after tests
     // const auth = req.currentUser;
@@ -27,11 +45,11 @@ router.route("/id/:id").get((req, res) => {
 
 router.route("/:id").delete((req, res) => {
     const auth = req.currentUser;
-    if (auth) {
+    // if (auth) {
         User.findByIdAndDelete(req.params.id)
             .then(user => res.json("User deleted: " + user))
             .catch(err => res.status(400).json("Error: " + err));
-    }
+    // }
 });
 
 router.route("/email").post((req, res) => {
