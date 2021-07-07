@@ -37,6 +37,7 @@ const EditProduct = props => {
                 setPricing(prices);
 
                 if (customers) {
+                    setCustomers([]);
                     customers.map(currentCustomer => {
                         let mapCust = {
                             value: currentCustomer._id,
@@ -64,32 +65,35 @@ const EditProduct = props => {
             console.log(res);
             window.location = "/admin/products";
         }
+        // import pricing
     }
 
     const addCustomerPrice = async e => {
         e.preventDefault();
-        let p = parseInt(Price);
 
-        let data = {sku, Customer, "Price": p };
-
-        setPricing(prev => [...prev, data]);
-
+        let data = {sku, Customer, Price };
         let product = {
             sku,
             Customer,
-            "Price": p
+            Price
         }
         // Append to state
         let res = await createPrice(product);
-        if (res) {
+        if (res.Message !== "Duplicate Found, skipping") {
+            setPricing(prev => [...prev, data]);
             console.log(res);
         }
     }
 
-    const deleteCustomerPrice = Customer => {
+    const deleteCustomerPrice = async (e, Customer) => {
+        e.preventDefault();
+        e.stopPropagation();
         // delete price from pricing
-        deletePrice(sku, Customer);
-        setPricing(pricing.filter(el => el.Customer !== Customer));
+        let res = await deletePrice(sku, Customer);
+        if (res.status !== 400) {
+            setPricing(pricing.filter(el => el.Customer !== Customer));
+            console.log(res)
+        }
     }
 
     const CustomerPrices = props => (
@@ -98,7 +102,7 @@ const EditProduct = props => {
             <td>{props.customer.Price}</td>
             <td>
                 {/* <Link to={"/admin/customers/edit/" + props.customer._id}>edit</Link> | */}
-                <a href="#" onClick={() => { props.deleteCustomerPrice(props.customer.Customer) }}>delete</a>
+                <a href="javascript:void(0)" onClick={(e) => {props.deleteCustomerPrice(e, props.customer.Customer) }}>delete</a>
             </td>
         </tr>
     );
@@ -122,11 +126,16 @@ const EditProduct = props => {
                     }}
                     onDrop={async (e) => {
                         e.preventDefault();
-                        const customerPrices = await e.dataTransfer.files[0].text();
-                        const res = parse(customerPrices, { header: true });
-                        console.log(res.data);
-                        setPricing(res.data);
-                        setImportDone(true);
+                        console.log(e.dataTransfer.files[0]);
+                        if (e.dataTransfer.files[0].type === "text/csv" || e.dataTransfer.files[0].type === "application/vnd.ms-excel") {
+                            const customerPrices = await e.dataTransfer.files[0].text();
+                            const res = parse(customerPrices, { header: true });
+                            console.log(res.data);
+                            setPricing(res.data);
+                            setImportDone(true);
+                        } else {
+                            console.log("Error: File type does not match text/csv")
+                        }
                     }}
                 >
                     Drag CSV to import Customer Pricing

@@ -165,3 +165,9 @@
 .buying-options {
   
 }
+
+.dragndrop {
+  border: 1px solid;
+  padding: 10px;
+  background-color: lightgrey;
+}

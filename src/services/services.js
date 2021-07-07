@@ -142,6 +142,17 @@ export const updateProduct = async (product) => {
     }
 }
 
+export const deleteProduct = async (id) => {
+    const header = await createToken();
+
+    try {
+        const res = await axios.delete(deployment.localhost + "/products/" + id, header)
+        return res.data;
+    } catch (e) {
+        console.error(e);
+    }
+}
+
 // Prices
 
 export const getPrices = async (page, limit, q, cq) => {
@@ -177,11 +188,11 @@ export const createPrice = async (product) => {
     }
 }
 
-export const deletePrice = async (sku, Customer) => {
+export const deletePrice = async (id) => {
     const header = await createToken();
 
     try {
-        const res = await axios.delete(deployment.localhost + "/products/prices/" + sku + "/" + Customer);
+        const res = await axios.delete(deployment.localhost + "/products/prices/" + id);
         return res.data;
     } catch (e) {
         console.error(e);
@@ -200,11 +211,11 @@ export const updatePrice = async (product) => {
 }
 
 // Customers
-export const getCustomers = async () => {
+export const getCustomers = async (page, limit, q, cq) => {
     const header = await createToken();
 
     try {
-      const res = await axios.get(deployment.localhost + "/customers/", header);
+        const res = await axios.get(deployment.localhost + "/customers?page=" + page + "&limit=" + limit + "&q=" + q + "&custq=" + cq, header)
       return res.data;
     } catch (e) {
       console.error(e);
@@ -222,11 +233,11 @@ export const getCustomer = async (id) => {
     }
 }
 
-export const createCustomer = async (user) => {
+export const createCustomer = async (customer) => {
     const header = await createToken();
 
     try {
-        const res = await axios.post(deployment.localhost + "/users/add", user, header)
+        const res = await axios.post(deployment.localhost + "/customers/add", customer, header)
         return res.data;
     } catch (e) {
         console.error(e);
@@ -249,6 +260,39 @@ export const deleteCustomer = async (id) => {
 
     try {
         const res = await axios.delete(deployment.localhost + "/customers/" + id, header);
+        return res.data;
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+export const importProducts = async (payload) => {
+    const header = await createToken();
+
+    try {
+        const res = await axios.post(deployment.localhost + "/products/import", payload, header);
+        return res.data;
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+export const importPricing = async (payload) => {
+    const header = await createToken();
+
+    try {
+        const res = await axios.post(deployment.localhost + "/products/prices/import", payload, header);
+        return res.data;
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+export const importCustomers = async (payload) => {
+    const header = await createToken();
+
+    try {
+        const res = await axios.post(deployment.localhost + "/customers/import", payload, header);
         return res.data;
     } catch (e) {
         console.error(e);

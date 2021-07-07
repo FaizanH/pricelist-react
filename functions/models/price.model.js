@@ -5,12 +5,14 @@ const priceSchema = new Schema({
     sku: {
         type: String,
     },
+    title: {
+        type: String,
+    },
     Customer: {
         type: String,
     },
     Price: {
-        type: Number,
-        default: 0
+        type: String,
     }
 }, {
     timestamps: true,

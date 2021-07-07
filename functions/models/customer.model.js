@@ -8,7 +8,7 @@ const customerSchema = new Schema({
     },
     email: {
         type: String,
-        default: false
+        default: ""
     },
 }, {
     timestamps: true,

@@ -1,6 +1,7 @@
 const router = require("express").Router();
 let Product = require("../models/product.model");
 let Price = require("../models/price.model");
+let Customer = require("../models/customer.model");
 
 function paginatedResults(model) {
     return async (req, res, next) => {
@@ -12,30 +13,11 @@ function paginatedResults(model) {
         const startIndex = (page - 1) * limit;
         const endIndex = page * limit;
         const totalProducts = await model.countDocuments().exec();
+        let searchMatches = [];
 
         const results = {};
 
-        if (endIndex < totalProducts) {
-            results.next = {
-                page: page + 1
-            }
-        }
-
-        if (startIndex > 0) {
-            results.prev = {
-                page: page - 1
-            }
-        }
-
-        results.current = {
-            page: page
-        }
-
-        results.total = Math.ceil(totalProducts / limit);
-
         try {
-            console.log(query)
-            console.log(customerQuery)
             if (query || customerQuery) {
                 let productQuery = [];
                 let custQuery = { "Customer": { $regex: customerQuery } };
@@ -55,14 +37,48 @@ function paginatedResults(model) {
                         ]
                     })
                     .limit(limit).skip(startIndex).exec();
+
+                    searchMatches = await model.find({
+                        $and: [
+                            custQuery,
+                            { $or: productQuery }
+                        ]
+                    }).exec();
                 } else {
                     if (customerQuery) {
                         productQuery.push(custQuery);
                     }
                     results.results = await model.find({$or:productQuery}).limit(limit).skip(startIndex).exec();
+                    searchMatches = await model.find({$or:productQuery}).exec();
                 }
             } else {
                 results.results = await model.find().limit(limit).skip(startIndex).exec();
+            }
+            console.log(searchMatches.length);
+            console.log(searchMatches);
+
+            if (searchMatches.length > 0) {
+                results.total = Math.ceil(searchMatches.length / limit);
+                if (endIndex < searchMatches.length ) {
+                    results.next = {
+                        page: page + 1
+                    }
+                }
+            } else {
+                results.total = Math.ceil(totalProducts / limit);
+                if (endIndex < totalProducts ) {
+                    results.next = {
+                        page: page + 1
+                    }
+                }
+            }
+            if (startIndex > 0) {
+                results.prev = {
+                    page: page - 1
+                }
+            }
+            results.current = {
+                page: page
             }
             res.paginatedResults = results;
             next()
@@ -78,9 +94,6 @@ router.route("/").get(paginatedResults(Product), (req, res) => {
 
 router.route("/prices").get(paginatedResults(Price), (req, res) => {
     res.json(res.paginatedResults);
-    // Price.find()
-    // .then(price => res.json(price))
-    // .catch(err => res.status(400).json("Error:" + err));
 });
 
 router.route("/sku/:sku").get((req, res) => {
@@ -100,10 +113,6 @@ router.route("/search").get((req, res) => {
     Product.findOne({sku})
         .then(product => res.json(product))
         .catch(err => res.status(400).json("Error: " + err));
-
-    // Price.findByIdAndDelete(req.params.id)
-    //     .then(price => res.json("Price deleted: " + price))
-    //     .catch(err => res.status(400).json("Error: " + err));
 })
 
 router.route("/id/:id").get((req, res) => {
@@ -120,34 +129,109 @@ router.route("/id/:id").get((req, res) => {
 
 router.route("/:id").delete((req, res) => {
     Product.findByIdAndDelete(req.params.id)
-        .then(product => res.json("Product deleted: " + product))
+        .then(product => {
+            console.log(product);
+            Price.deleteMany({"sku": product.sku})
+                .then(r => res.json("Products and it's prices deleted: "))
+        })
         .catch(err => res.status(400).json("Error: " + err));
 });
+
+async function importProductPromise(payload, res) {
+    return Promise.all( payload.map(product => {
+        const sku = product.sku;
+        const title = product.title;
+        const pricing = product.pricing;
+    
+        const newProduct = new Product({ sku, title, pricing });
+
+        Product.findOne({sku}, function(err, product) {
+            if (product) {
+            } else if (err) {
+                res.status(400).json("Error: " + err)
+            } else {
+                newProduct.save()
+                        .catch(err => {
+                            res.status(400).json("Error:" + err);
+                        });
+            }
+        })
+    }) );
+}
+
+async function importPricePromise(payload, res) {
+    return Promise.all( payload.map(price => {
+        const sku = price.sku;
+        const title = price.title;
+        const Customer = price.Customer;
+        const p = price.Price;
+
+        const newPrice = new Price({ sku, title, Customer, "Price": p });
+
+        Price.findOne({sku, "Customer": price.Customer}, function(err, price) {
+            if (price) {
+            } else if (err) {
+                res.status(400).json("Error: " + err)
+            } else {
+                newPrice.save()
+                        .catch(err => res.status(400).json("Error:" + err));
+            }
+        })
+    }) );
+}
+
+router.route("/import").post(async (req, res) => {
+    let payload = req.body.data;
+
+    importProductPromise(payload, res).then(r => {
+        res.json("Products Imported");
+    })
+})
+
+router.route("/prices/import").post(async (req, res) => {
+    let payload = req.body.data;
+
+    importPricePromise(payload, res).then(r => {
+        res.json("Prices Imported");
+    })
+})
 
 router.route("/add").post((req, res) => {
     const sku = req.body.sku;
     const title = req.body.title;
-    // const availability = req.body.availablitity;
-    // const active = req.body.active;
-    // const description = req.body.description;
-    // const image = req.body.image;
-    // const stockOnHand = req.body.stockOnHand;
     const pricing = req.body.pricing;
+
     const newProduct = new Product({ sku, title });
 
     if (pricing.length > 0) {
         pricing.map(price => {
             let newPrice = new Price({ sku, Customer: price.Customer, Price: price.Price });
             // Check for duplicates
-            newPrice.save()
-                    .then(() => res.json("New Price Created"))
-                    .catch(err => res.status(400).json("Error:" + err));
+            Price.findOne({sku, "Customer": price.Customer}, function(err, product) {
+                if (product) {
+                } else if (err) {
+                    res.status(400).json("Error: " + err)
+                } else {
+                    newPrice.save()
+                            // .then(() => )
+                            .catch(err => res.status(400).json("Error:" + err));
+                }
+            })
         });
+        res.json("New Product Created")
     }
 
-    newProduct.save()
-                .then(() => res.json("New Product Created"))
-                .catch(err => res.status(400).json("Error:" + err));
+    // Check for duplicates
+    Product.findOne({sku}, function(err, product) {
+        if (product) {
+        } else if (err) {
+            res.status(400).json("Error: " + err)
+        } else {
+            newProduct.save()
+                    .then(() => res.json("New Product Created"))
+                    .catch(err => res.status(400).json("Error:" + err));
+        }
+    })
 });
 
 router.route("/update").post((req, res) => {
@@ -187,7 +271,8 @@ router.route("/prices/update").post((req, res) => {
 
 router.route("/prices/add").post((req, res) => {
     const sku = req.body.sku;
-    const p = req.body.Price;
+    const title = req.body.title;
+    const Price = req.body.Price;
     const Customer = req.body.Customer;
     Price.findOne({"Customer": Customer, sku}, function(err, price) {
         if (err) {
@@ -196,12 +281,12 @@ router.route("/prices/add").post((req, res) => {
             // Duplicate
             res.json({"Message": "Duplicate Found, skipping"});
         } else {
-            let newPrice = new Price({ sku, Customer, "Price": p });
+            let newPrice = new Price({ sku, title, Customer, Price });
             newPrice.save()
-                    .then(() => res.json("New Price Created"))
                     .catch(err => res.status(400).json("Error:" + err));
         }
     })
+    res.json("New Price Created")
 })
 
 router.route("/prices/search").get((req, res) => {

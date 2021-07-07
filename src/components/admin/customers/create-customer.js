@@ -4,6 +4,7 @@ import { Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import deployment from "../../../deployment";
+import { createCustomer } from "../../../services/services";
 
 export default class CreateCustomer extends Component {
     constructor(props) {
@@ -31,21 +32,23 @@ export default class CreateCustomer extends Component {
         });
     }
 
-    onSubmit(e) {
+    async onSubmit(e) {
         e.preventDefault();
         const customer = {
             name: this.state.name,
             email: this.state.email
         }
         console.log(customer);
-        axios.post(deployment.localhost + "/customers/add", customer)
-            .then(res => console.log(res.data));
-
-        this.setState({
-            name: '',
-            email: ''
-        });
-        window.location = "/admin/customers";
+        // axios.post(deployment.localhost + "/customers/add", customer)
+        //     .then(res => console.log(res.data));
+        let res = await createCustomer(customer);
+        if (res) {
+            this.setState({
+                name: '',
+                email: ''
+            });
+            window.location = "/admin/customers";
+        }
     }
 
     render() {

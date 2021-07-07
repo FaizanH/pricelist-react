@@ -3,11 +3,12 @@ import { Link } from "react-router-dom";
 import { Table, Button, Form, InputGroup, FormControl, Pagination } from "react-bootstrap";
 import axios from "axios";
 import deployment from "../../../deployment";
-import { getProducts } from "../../../services/services";
+import { getProducts, deleteProduct } from "../../../services/services";
 
 let _isMounted = false;
 let startMidPages = 2;
 let endMidPages = 2;
+let productsPerPage = 10;
 
 const ManageProducts = props => {
     const [products, setProducts] = useState([]);
@@ -20,7 +21,7 @@ const ManageProducts = props => {
     useEffect(() => {
         _isMounted = true;
         if (update || products.length === 0) {
-            fetchData(page, 5);
+            fetchData(page, productsPerPage);
         }
         return () => { _isMounted = false };
     }, [update]);
@@ -35,19 +36,17 @@ const ManageProducts = props => {
         }
     }
 
-    const deleteProduct = async(e, id) => {
+    const delProduct = async (e, id) => {
         e.preventDefault();
-        axios.delete(deployment.localhost + "/products//" + id)
-            .then(res => {
-                console.log(res.data)
-                setUpdate(true);
-            });
+        let res = await deleteProduct(id);
+        if (res) {
+            setUpdate(true);
+        }
     }
 
     const searchProducts = e => {
         e.preventDefault();
         console.log(queryString);
-
         setUpdate(true);
     }
 
@@ -57,7 +56,7 @@ const ManageProducts = props => {
             <td>{props.product.title}</td>
             <td>
                 <Link to={"/admin/products/edit?sku=" + props.product.sku}>edit</Link> |
-                <a href="#" onClick={(e) => { props.deleteProduct(e, props.product._id) }}> delete</a>
+                <a href="javascript:void(0);" onClick={(e) => {props.delProduct(e, props.product._id)}}> delete</a>
             </td>
         </tr>
     )
@@ -65,7 +64,7 @@ const ManageProducts = props => {
     const productsList = e => {
         if (products != "") {
             return products.results.map(currentproduct => {
-                return <Product product={currentproduct} deleteProduct={deleteProduct} key={currentproduct._id} />;
+                return <Product product={currentproduct} delProduct={delProduct} key={currentproduct._id} />;
             });
         }
     }
@@ -184,6 +183,8 @@ const ManageProducts = props => {
                 </tbody>
             </Table>
             { pageNavigation() }
+            <br/>
+            <Button as={Link} to="/admin/import-product" variant="primary" type="submit">Import Products</Button>
         </div>
     );
 }

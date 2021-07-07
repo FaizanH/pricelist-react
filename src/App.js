@@ -23,6 +23,9 @@ import AddProduct from "./components/admin/products/create-product.component";
 import EditProduct from "./components/admin/products/edit-product.component";
 import EditUser from "./components/admin/users/edit-user.component";
 
+import ImportProducts from "./components/admin/products/import-products";
+import ImportPricing from "./components/admin/products/import-pricing";
+
 import ManageCustomers from "./components/admin/customers/manage-customers";
 import CreateCustomer from "./components/admin/customers/create-customer";
 import EditCustomer from "./components/admin/customers/edit-customer";
@@ -30,7 +33,6 @@ import EditCustomer from "./components/admin/customers/edit-customer";
 // Public Routes
 import Menu from "./components/public/common/menu/common-menu.component"
 import ViewPricing from "./components/public/common/pages/view-pricing";
-import Product from "./components/public/products/product";
 // import Home from "./components/public/common/pages/home";
 import Dashboard from "./components/public/common/dashboard/dashboard";
 import Login from "./components/public/common/pages/login";
@@ -106,7 +108,7 @@ function App() {
                           ) : null) : null }
           <div className={classContent}>
             <ProtectedRoute exact path="/admin/create-user" successRoute={"/admin/users"} user={user} isLoggedIn={isLoggedIn} component={CreateUser} setLoadingState={setLoadingState} />
-               
+
             <ProtectedRoute exact path="/admin/users" user={user} isLoggedIn={isLoggedIn} component={ManageUsers} />
             <ProtectedRoute exact path="/admin/users/edit/:id" user={user} isLoggedIn={isLoggedIn} component={EditUser} />
 
@@ -114,6 +116,9 @@ function App() {
             <ProtectedRoute exact path="/admin/add-product" user={user} isLoggedIn={isLoggedIn} component={AddProduct} />
             <ProtectedRoute exact path="/admin/products" user={user} isLoggedIn={isLoggedIn} component={ManageProducts} />
             <ProtectedRoute exact path="/admin/products/edit" user={user} isLoggedIn={isLoggedIn} component={EditProduct} />
+
+            <ProtectedRoute exact path="/admin/import-product" user={user} isLoggedIn={isLoggedIn} component={ImportProducts} />
+            <ProtectedRoute exact path="/admin/import-pricing" user={user} isLoggedIn={isLoggedIn} component={ImportPricing} />
 
             <ProtectedRoute exact path="/admin/customers" user={user} isLoggedIn={isLoggedIn} component={ManageCustomers} />
             <ProtectedRoute exact path="/admin/create-customer" user={user} isLoggedIn={isLoggedIn} component={CreateCustomer} />

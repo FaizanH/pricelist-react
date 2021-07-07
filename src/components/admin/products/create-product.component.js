@@ -3,7 +3,7 @@ import { Button, Table, Form } from "react-bootstrap";
 import Select from 'react-select'
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { createProduct, getCustomers } from "../../../services/services";
+import { createProduct, getCustomers, createPrice, deletePrice } from "../../../services/services";
 import deployment from "../../../deployment";
 
 import { parse } from "papaparse";
@@ -24,6 +24,7 @@ const AddProduct = props => {
         async function fetchData() {
             let customers = await getCustomers();
             if (customers) {
+                setCustomers([]);
                 customers.map(currentCustomer => {
                     let mapCust = {
                         value: currentCustomer._id,
@@ -37,9 +38,14 @@ const AddProduct = props => {
         return () => { _isMounted = false };
     }, [pricing]);
 
-    const deleteCustomerPrice = Customer => {
-        setPricing(pricing.filter(el => el.Customer !== Customer));
-        setCustomers([]);
+    const deleteCustomerPrice = async (e, Customer) => {
+        e.preventDefault();
+        e.stopPropagation();
+        let res = await deletePrice(sku, Customer);
+        if (res.status !== 400) {
+            setPricing(pricing.filter(el => el.Customer !== Customer));
+            console.log(res)
+        }
     }
 
     const CustomerPrices = props => (
@@ -48,7 +54,7 @@ const AddProduct = props => {
             <td>{props.customer.Price}</td>
             <td>
                 {/* <Link to={"/admin/customers/edit/" + props.customer._id}>edit</Link> | */}
-                <a href="#" onClick={() => { props.deleteCustomerPrice(props.customer.Customer) }}>delete</a>
+                <a href="javascript:void(0)" onClick={(e) => {props.deleteCustomerPrice(e, props.customer.Customer) }}>delete</a>
             </td>
         </tr>
     );
@@ -62,10 +68,14 @@ const AddProduct = props => {
                     }}
                     onDrop={async (e) => {
                         e.preventDefault();
-                        const customerPrices = await e.dataTransfer.files[0].text();
-                        const res = parse(customerPrices, { header: true });
-                        setPricing(res.data);
-                        setImportDone(true);
+                        if (e.dataTransfer.files[0].type === "text/csv" || e.dataTransfer.files[0].type === "application/vnd.ms-excel") {
+                            const customerPrices = await e.dataTransfer.files[0].text();
+                            const res = parse(customerPrices, { header: true });
+                            setPricing(res.data);
+                            setImportDone(true);
+                        } else {
+                            console.log("Error: File type does not match text/csv")
+                        }
                     }}
                 >
                     Drag CSV to import Customer Pricing
@@ -97,13 +107,22 @@ const AddProduct = props => {
         }
     }
 
-    const addCustomerPrice = e => {
+    const addCustomerPrice = async e => {
         e.preventDefault();
-        let p = parseInt(Price);
-        let data = { Customer, "Price": p };
+        let data = { Customer, Price };
+        let product = {
+            sku,
+            title,
+            Customer,
+            Price
+        }
         // Append to state
-        setPricing(prev => [...prev, data]);
-        setCustomers([]);
+        let res = await createPrice(product);
+
+        if (res.Message !== "Duplicate Found, skipping") {
+            setPricing(prev => [...prev, data]);
+            console.log(res);
+        }
     }
 
     return (
@@ -115,10 +134,11 @@ const AddProduct = props => {
                 <Form.Label>Name</Form.Label>
                 <Form.Control type="text" value={title} onChange={e => setTitle(e.target.value)}  placeholder=""/>
                 <br/>
-                <Form.Label>Add New Customer Price</Form.Label>
+                <Form.Label>Add New Customer Price</Form.Label>&emsp;
+                <Button target={"_blank"} as={Link} to={"/admin/create-customer"}>New Customer</Button>
                 <Select options={customers} onChange={e => setCustomerName(e.label)} placeholder="Select Customer" />
                 <Form.Control type="text" value={Price} onChange={e => setCustomerPrice(e.target.value)} placeholder="Enter Price"/>
-                <Button onClick={ addCustomerPrice }>Add</Button>
+                <Button onClick={ addCustomerPrice }>Add Price</Button>
                 <br/><br/>
                 <Table striped bordered hover>
                     <thead>

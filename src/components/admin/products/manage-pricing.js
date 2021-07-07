@@ -8,6 +8,7 @@ import { getPrices, updatePrice, deletePrice } from "../../../services/services"
 let _isMounted = false;
 let startMidPages = 2;
 let endMidPages = 2;
+let productsPerPage = 10;
 
 // Refactor all methods to update price schema instead of products - remove pricing array from products
 
@@ -25,7 +26,7 @@ const ManagePricing = props => {
     useEffect(() => {
         _isMounted = true;
         if (update || prices.length === 0) {
-            fetchData(page, 5);
+            fetchData(page, productsPerPage);
         }
 
         return () => { _isMounted = false };
@@ -40,10 +41,12 @@ const ManagePricing = props => {
         }
     }
 
-    const deletePrices = async(sku, Customer) => {
-        console.log(Customer);
-        deletePrice(sku, Customer)
-        setUpdate(true);
+    const deletePrices = async(e, id) => {
+        e.stopPropagation();
+        let res = await deletePrice(id);
+        if (res) {
+            setUpdate(true);
+        }
         // axios.delete(deployment.localhost + "/products/prices/" + prodid + "/" + Customer)
         //     .then(res => {
         //         console.log(res.data)
@@ -58,7 +61,10 @@ const ManagePricing = props => {
             Customer,
             Price
         }
-        updatePrice(payload);
+        let res = await updatePrice(payload);
+        if (res) {
+            setUpdate(true);
+        }
         // axios.post(deployment.localhost + "/products/pricing", payload)
         //     .then(res => {
         //         console.log(res.data)
@@ -74,8 +80,8 @@ const ManagePricing = props => {
     const CustomerPrice = React.forwardRef((props, ref) => (
         <tr>
             <td>{props.price.Customer}</td>
-            <td><Link to={"/admin/products/edit?sku=" + props.product.sku}>{props.product.sku}</Link></td>
-            <td>{props.product.title}</td>
+            <td><Link to={"/admin/products/edit?sku=" + props.price.sku}>{props.price.sku}</Link></td>
+            <td>{props.price.title}</td>
 
             <td>
             <Form.Control
@@ -90,8 +96,8 @@ const ManagePricing = props => {
 
             </td>
             <td key="events">
-                <a href="#" onClick={(e) => { props.updatePrices(e, props.product.sku, props.price.Customer, ref.current.value) }}>update</a> |
-                <a href="#" onClick={() => { props.deletePrices(props.product.sku, props.price.Customer) }}> delete</a>
+                <a href="javascript:void(0)" onClick={(e) => { props.updatePrices(e, props.price.sku, props.price.Customer, ref.current.value) }}>update</a> |
+                <a href="javascript:void(0)" onClick={(e) => { props.deletePrices(e, props.price._id) }}> delete</a>
             </td>
         </tr>
     ));
@@ -99,7 +105,7 @@ const ManagePricing = props => {
     const productsList = e => {
         if (prices != "") {
             return prices.results.map(currentprice => {
-                return <CustomerPrice ref={React.createRef()} product={currentprice} price={currentprice} updatePrices={updatePrices} deletePrices={deletePrices} key={currentprice._id} />;
+                return <CustomerPrice ref={React.createRef()} price={currentprice} updatePrices={updatePrices} deletePrices={deletePrices} key={currentprice._id} />;
             });
         }
     }
@@ -137,6 +143,8 @@ const ManagePricing = props => {
                     endMidPages = prices.total - 1;
                     startMidPages = endMidPages - 4;
                 }
+            } else {
+                endMidPages = prices.total;
             }
         }
     }
@@ -222,6 +230,8 @@ const ManagePricing = props => {
                 </tbody>
             </Table>
             { pageNavigation() }
+            <br/>
+            <Button as={Link} to="/admin/import-pricing" variant="primary" type="submit">Import Prices</Button>
         </div>
     );
 }
