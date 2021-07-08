@@ -57,7 +57,13 @@ function App() {
     setIsLoggedIn(false);
   };
   const setLoadingState = state => {
-    setLoading(state);
+    if (state) {
+      _isMounted = true;
+      setLoading(state);
+    } else {
+      setLoading(state);
+      _isMounted = false;
+    }
   }
 
   useEffect(() => {
@@ -118,7 +124,7 @@ function App() {
             <ProtectedRoute exact path="/admin/products/edit" user={user} isLoggedIn={isLoggedIn} component={EditProduct} />
 
             <ProtectedRoute exact path="/admin/import-product" user={user} isLoggedIn={isLoggedIn} component={ImportProducts} />
-            <ProtectedRoute exact path="/admin/import-pricing" user={user} isLoggedIn={isLoggedIn} component={ImportPricing} />
+            <ProtectedRoute exact path="/admin/import-pricing" user={user} isLoggedIn={isLoggedIn} setLoadingState={setLoadingState} component={ImportPricing} />
 
             <ProtectedRoute exact path="/admin/customers" user={user} isLoggedIn={isLoggedIn} component={ManageCustomers} />
             <ProtectedRoute exact path="/admin/create-customer" user={user} isLoggedIn={isLoggedIn} component={CreateCustomer} />

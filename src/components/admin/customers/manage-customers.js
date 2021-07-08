@@ -175,7 +175,7 @@ const ManageCustomers = props => {
 
     return (
         <div>
-            <h3>Manage Customers</h3>
+            <p>Manage Customers</p>
             <Button as={Link} to="/admin/create-customer" variant="primary" type="submit">Add Customer</Button>
             <br/>
             <Table striped bordered hover>
@@ -197,69 +197,3 @@ const ManageCustomers = props => {
 }
 
 export default ManageCustomers;
-
-// const Customer = props => (
-//     <tr>
-//         <td>{props.customer.name}</td>
-//         <td>{props.customer.email}</td>
-//         <td>
-//             <Link to={"/admin/customers/edit/" + props.customer._id}>edit</Link> |
-//             <a href="javascript:void(0);" onClick={(e) => { props.delCustomer(e, props.customer._id) }}>delete</a>
-//         </td>
-//     </tr>
-// );
-
-// export default class ManageCustomers extends Component {
-//     constructor(props) {
-//         super(props);
-
-//         this.delCustomer = this.delCustomer.bind(this);
-
-//         this.state = { customers: [] };
-//     }
-
-//     componentDidMount() {
-//         axios.get(deployment.localhost + "/customers")
-//             .then(res => {
-//                 this.setState({ customers: res.data })
-//             })
-//             .catch(err => console.log(err));
-//     }
-
-//     async delCustomer(e, id) {
-//         e.preventDefault();
-//         let res = await deleteCustomer(id);
-//         if (res) {
-//             this.setState({
-//                 customers: this.state.customers.filter(el => el._id !== id)
-//             });
-//         }
-//     }
-
-//     customersList() {
-//         return this.state.customers.map(current => {
-//             return <Customer customer={current} delCustomer={this.delCustomer} key={current._id} />;
-//         });
-//     }
-
-//     render() {
-//         return (
-//             <div>
-//                 <h3>Manage Customers</h3>
-//                 <Button as={Link} to="/admin/create-customer" variant="primary" type="submit">Add Customer</Button>
-//                 <br/>
-//                 <Table striped bordered hover>
-//                     <thead>
-//                         <tr>
-//                             <th>Customer Name</th>
-//                             <th>Email</th>
-//                         </tr>
-//                     </thead>
-//                     <tbody>
-//                         { this.customersList() }
-//                     </tbody>
-//                 </Table>
-//             </div>
-//         );
-//     }
-// }

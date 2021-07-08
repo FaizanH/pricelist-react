@@ -22,7 +22,6 @@ const Dashboard = props => {
   return (
       <div>
         <h1>Dashboard</h1>
-        <p>Secret Page</p>
         <p>Logged in as: {props.user.username.toString()}</p>
         <p>Access Level: {props.user.permission_group.toString()}</p>
       </div>

@@ -21,7 +21,7 @@ const ViewPricing = props => {
     useEffect(() => {
         _isMounted = true;
         if (update || prices.length === 0) {
-            fetchData(page, 5);
+            fetchData(page, 10);
         }
 
         return () => { _isMounted = false };

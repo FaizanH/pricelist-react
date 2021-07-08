@@ -54,9 +54,6 @@ function paginatedResults(model) {
             } else {
                 results.results = await model.find().limit(limit).skip(startIndex).exec();
             }
-            console.log(searchMatches.length);
-            console.log(searchMatches);
-
             if (searchMatches.length > 0) {
                 results.total = Math.ceil(searchMatches.length / limit);
                 if (endIndex < searchMatches.length ) {
@@ -80,6 +77,7 @@ function paginatedResults(model) {
             results.current = {
                 page: page
             }
+            results.totalProducts = totalProducts;
             res.paginatedResults = results;
             next()
         } catch (e) {
@@ -130,7 +128,6 @@ router.route("/id/:id").get((req, res) => {
 router.route("/:id").delete((req, res) => {
     Product.findByIdAndDelete(req.params.id)
         .then(product => {
-            console.log(product);
             Price.deleteMany({"sku": product.sku})
                 .then(r => res.json("Products and it's prices deleted: "))
         })

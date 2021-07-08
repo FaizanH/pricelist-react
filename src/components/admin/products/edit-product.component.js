@@ -26,7 +26,9 @@ const EditProduct = props => {
         async function fetchData() {
             let params = queryString.parse(props.location.search);
             let res = await getProductBySku(params.sku);
-            let customers = await getCustomers();
+            let customers = await getCustomers(1, 1000, "", "");
+
+                console.log(customers)
 
             if (res) {
                 setsku(res.sku);
@@ -38,7 +40,7 @@ const EditProduct = props => {
 
                 if (customers) {
                     setCustomers([]);
-                    customers.map(currentCustomer => {
+                    customers.results.map(currentCustomer => {
                         let mapCust = {
                             value: currentCustomer._id,
                             label: currentCustomer.name

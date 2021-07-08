@@ -22,10 +22,10 @@ const AddProduct = props => {
     useEffect(() => {
         _isMounted = true;
         async function fetchData() {
-            let customers = await getCustomers();
+            let customers = await getCustomers(1, 1000, "", "");
             if (customers) {
                 setCustomers([]);
-                customers.map(currentCustomer => {
+                customers.results.map(currentCustomer => {
                     let mapCust = {
                         value: currentCustomer._id,
                         label: currentCustomer.name

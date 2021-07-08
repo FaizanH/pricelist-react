@@ -53,7 +53,7 @@ export default class ManageUsers extends Component {
     render() {
         return (
             <div>
-                <h3>Manage Users</h3>
+                <p>Manage Users</p>
                 <Button as={Link} to="/admin/create-user" variant="primary" type="submit">Add User</Button>
                 <br/>
                 <Table striped bordered hover>

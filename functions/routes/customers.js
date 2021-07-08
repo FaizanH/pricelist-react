@@ -79,6 +79,7 @@ function paginatedResults(model) {
             results.current = {
                 page: page
             }
+            results.totalCustomers = totalProducts;
             res.paginatedResults = results;
             next()
         } catch (e) {

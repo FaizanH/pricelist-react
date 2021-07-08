@@ -26,6 +26,7 @@ const AdminMenu = props => {
                         <NavDropdown title="Manage" id="basic-nav-dropdown">
                             <NavDropdown.Item as={Link} to="/admin/users">Manage Users</NavDropdown.Item>
                             <NavDropdown.Item as={Link} to="/admin/products">Manage Products</NavDropdown.Item>
+                            <NavDropdown.Item as={Link} to="/admin/pricing">Manage Catalogue</NavDropdown.Item>
                         </NavDropdown>
                         <Nav.Link className="menu-link" onClick={handleLogout}>Logout</Nav.Link>
                     </Nav>

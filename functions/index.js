@@ -8,7 +8,7 @@ const decodeIDToken = require('./authenticateToken');
 // https://pricelist-boulvandre.web.app
 // http://localhost:3000
 const app = express();
-app.use(cors({credentials: true, origin: "https://pricelist-boulvandre.web.app", methods: "GET, HEAD, PUT, PATCH, POST, DELETE"}));
+app.use(cors({credentials: true, origin: "http://localhost:3000", methods: "GET, HEAD, PUT, PATCH, POST, DELETE"}));
 app.use(express.json());
 app.use(decodeIDToken);
 

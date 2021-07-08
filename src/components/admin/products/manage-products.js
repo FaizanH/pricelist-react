@@ -47,6 +47,7 @@ const ManageProducts = props => {
     const searchProducts = e => {
         e.preventDefault();
         console.log(queryString);
+        setPage(1); // Reset pages
         setUpdate(true);
     }
 

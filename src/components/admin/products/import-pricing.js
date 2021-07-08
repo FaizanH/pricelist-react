@@ -16,6 +16,10 @@ const ImportPricing = props => {
     const [importDone, setImportDone] = useState(false);
     const [customers, setCustomers] = useState([]);
 
+    let tempCustomers = [];
+    let slicedArray = [];
+    let tempPricing = [];
+
     let _isMounted = false;
 
     useEffect(() => {
@@ -67,17 +71,6 @@ const ImportPricing = props => {
     //     return Promise.all( array.map(element => importCheck(type, element)) )
     // }
 
-    const doImportPricingBulk = async (d) => {
-        d = {
-            data: d
-        }
-        console.log(d);
-        let res = await importPricing(d);
-        if (res) {
-            console.log("Pricing Import Completed: ");
-        }
-    }
-
     const doImportCustomersBulk = async (d) => {
         d = {
             data: d
@@ -88,28 +81,6 @@ const ImportPricing = props => {
             console.log("Customer Import Completed: ");
         }
     }
-
-    const onSubmit = async e => {
-        e.preventDefault();
-        doImportPricingBulk(pricing).then(() => {
-            doImportCustomersBulk(customers).then(() => {
-                console.log("All Imports Completed");
-                                        // setTimeout(() => {
-            //     window.location = "/admin/products";
-            // }, 2500)
-            })
-        })
-        console.log(customers);
-    }
-
-    // doImport("pricing", pricing).then(r => {
-    //     doImport("customers", customers).then(t => {
-    //         console.log("Import completed");
-    //         // setTimeout(() => {
-    //         //     window.location = "/admin/products";
-    //         // }, 2500)
-    //     })
-    // })
 
     const buildProducts = async payload => {
         // Build products list
@@ -143,6 +114,102 @@ const ImportPricing = props => {
         });
     }
 
+    const moreEfficientBuild = async (productline, skus, customers) => {
+        if (productline.priceid !== "") {
+            if (!skus.includes(productline.sku)) {
+                // Not duplicate sku
+                skus.push(productline.sku);
+                tempPricing.push(productline);
+
+                // Check for unique Customer Names
+                if (!customers.includes(productline.Customer)) {
+                    customers.push(productline.Customer);
+                    // Create customer
+                    let newCustomer = {
+                        name: productline.Customer,
+                        email: "" // Empty email for imports
+                    }
+                    tempCustomers.push(newCustomer);
+                }
+            }
+            else {
+                // Duplicate sku found. Only create price
+                tempPricing.push(productline);
+            }
+        }
+    }
+
+    // Testing code
+    const doImportPricingBatch = async (batch) => {
+        batch = {
+            data: batch
+        }
+        setTimeout(() => {
+            return Promise.resolve(importPricing(batch));
+        }, 1000)
+    }
+
+    const doImport = async (largeArray) => {
+        return Promise.all( largeArray.map(element => doImportPricingBatch(element)) )
+    }
+
+    const onSubmit = async e => {
+        e.preventDefault();
+        // console.log(pricing);
+
+        // Import in batches of 1000
+        var i, chunk = 1000;
+        if (pricing.length > 1000) {
+            for (i=0; i<pricing.length; i+=chunk) {
+                let batch = pricing.slice(i, i+chunk);
+                slicedArray.push(batch);
+            }
+            console.log(slicedArray);
+            doImport(slicedArray).then(() => {
+                console.log("All Imports Completed");
+            })
+        } else { // Account for last non-1000 batch
+            console.log(pricing);
+            doImportPricingBatch(pricing).then(() => {
+                console.log("Import Completed");
+            })
+        }
+    }
+
+    // const loopAsync = async e => {
+
+    //     doImportPricingBulk(batch).then(() => {
+    //         if (!importComplete) {
+    //             if (i < pricing.length) {
+    //                 batch = pricing.slice(i, i + chunk);
+    //                 i += chunk;
+    //                 console.log("Running import: ");
+
+    //                 loopAsync();
+    //             } else {
+    //                 importComplete = true;
+    //             }
+    //         } else {
+    //             console.log("All Imports Completed");
+    //         }
+
+    //         // doImportCustomersBulk(customers).then(() => {
+    //         //     console.log("All Imports Completed");
+    //         //                             // setTimeout(() => {
+    //         // //     window.location = "/admin/products";
+    //         // // }, 2500)
+    //         // })
+    //     })
+    // }
+
+    const importCSV = e => {
+        e.preventDefault();
+        setPricing(tempPricing);
+        setCustomers(tempCustomers);
+        // console.log(tempCustomers);
+        // console.log(tempPricing);
+    }
+
     const DragNDropElement = props => (
         // <tr>
         //     <td colSpan={"100%"}>
@@ -152,12 +219,30 @@ const ImportPricing = props => {
                     }}
                     onDrop={async (e) => {
                         e.preventDefault();
+                        tempPricing = [];
+                        tempCustomers = [];
+
                         if (e.dataTransfer.files[0].type === "text/csv" || e.dataTransfer.files[0].type === "application/vnd.ms-excel") {
+                            // Parse csv
                             const customerPrices = await e.dataTransfer.files[0].text();
-                            const res = parse(customerPrices, { header: true });
+                            let uniqueSkus = [];
+                            let uniqueCustomers = [];
+
+                            parse(customerPrices, {
+                                header: true,
+                                worker: true,
+                                step: line => {
+                                    moreEfficientBuild(line.data, uniqueSkus, uniqueCustomers);
+                                },
+                                complete: r => {
+                                    console.log("Finished importing prices");
+                                    // setImportDone(true);
+                                }
+                            });
+
                             // Recursively add products
-                            buildProducts(res.data)
-                            setImportDone(true);
+                            // buildProducts(res.data)
+                            // setImportDone(true);
                         } else {
                             console.log("Error: File type does not match text/csv")
                         }
@@ -180,6 +265,11 @@ const ImportPricing = props => {
     }
 
     const columns = [
+        {
+            dataField: "priceid",
+            text: "Price ID",
+            sort: true
+        },
         {
             dataField: "sku",
             text: "Product SKU",
@@ -205,10 +295,10 @@ const ImportPricing = props => {
     const paginatedTable = e => (
         <BootstrapTable
             bootstrap4
-            keyField="sku"
+            keyField="priceid"
             data={pricing}
             columns={columns}
-            pagination={paginationFactory({ sizePerPage: 5 })}
+            pagination={paginationFactory({ sizePerPage: 10 })}
         />
     )
 
@@ -217,7 +307,10 @@ const ImportPricing = props => {
             <h6>Import Products</h6>
             <Form id="submit-new-pricing" onSubmit={ onSubmit } className="mb-3">
                 <div>
-                    { DragNDropElement() }
+                    <DragNDropElement setLoadingState={props.setLoadingState} />
+                    <br/>
+                    <Button variant="primary" onClick={importCSV}>Import CSV</Button>
+                    {/* { DragNDropElement() } */}
                 </div>
                 <br/>
                 { paginatedTable() }
@@ -239,7 +332,7 @@ const ImportPricing = props => {
                 <Button onClick={() => setPricing([])}>Clear</Button>
                 <br/><br/>
                 <Button as={Link} to="/admin/pricing" variant="primary">Back</Button>
-                <Button variant="primary" type="submit">Import</Button>
+                <Button variant="primary" type="submit">Import Prices</Button>
             </Form>
         </div>
     );
